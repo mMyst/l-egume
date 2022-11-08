@@ -38,6 +38,7 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     fscenar = 'liste_scenarios.xls' #'liste_scenarios_exemple.xls'
     fsd = 'exemple_sd.xls' #nom mis a jour mais pas table variance_geno
     fopt = 'mod_susm.xls'## fichier option
+    fsdx = 'exemple_corr_matrix.xls'
     fsta = 'stations_exemple.xls' ##fichier station
     ongletSta = 'Lusignan'  # 'exemple'
 
@@ -76,6 +77,9 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
 
     path_scenar = os.path.join(foldin, fscenar)#(path_, 'input', fscenar)
     testsim[name].mn_sc = path_scenar
+    
+    path_variance_matrix = os.path.join(foldin, fsdx)
+    testsim[name].path_variance_matrix = path_variance_matrix
 
     path_variance_geno = os.path.join(foldin, fsd)#(path_, 'input', fsd)
     testsim[name].path_variance_geno = path_variance_geno
