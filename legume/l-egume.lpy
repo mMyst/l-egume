@@ -188,6 +188,7 @@ movDisplay =0 # #sauvegarde toutes les vues pour faire un film
 opt_zip = 0 #if 1, zip and delete the output csv files 
 opt_verbose =1 #0, remove print in the console
 
+#test
 
 #1 seul axe en developpemnt? -> arret
 #PAR tresh a 1 ou au dessus fait tout s'arreter?? 0.999 marche..
