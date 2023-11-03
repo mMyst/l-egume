@@ -1,6 +1,7 @@
 
 #import the modules necessary to initiate the L-systems
-from openalea.lpy import *
+import openalea.lpy as lpy
+#from openalea.lpy import *
 
 import os
 import sys
@@ -53,7 +54,7 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     #names.append(name)
     path_ = os.path.dirname(os.path.abspath(legume.__file__))  # local absolute path of L-egume
     path_lsys = os.path.join(path_, str(ls_usms['l_system'][i]))
-    testsim[name] = Lsystem(path_lsys)  # objet l-system
+    testsim[name] = lpy.Lsystem(path_lsys)  # objet l-system
 
     # testsim[name].ongletM = str(ls_usms['ongletM'][i])
     meteo_path_ = os.path.join(foldin, str(ls_usms['meteo'][i]))#(path_, 'input', str(ls_usms['meteo'][i]))
@@ -202,7 +203,7 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     else:
         print('unknown arrangement and nbplant')
 
-    a = AxialTree()
+    a = lpy.AxialTree()
     a.append(testsim[name].attente(1))
     for j in range(0, nbplantes):
         a.append(testsim[name].Sd(j))

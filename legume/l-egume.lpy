@@ -75,7 +75,7 @@ opt_external_coupling = 0 # 1 for environmental coupling out of lpy; 0 for inter
 
 #initialisation des variables globale de simulation
 DOYdeb = 60#100#49#159#124#
-DOYend = 125#335#180#202#231#335#610#120#250#244#282#
+DOYend = 135#335#180#202#231#335#610#120#250#244#282#
 Rseed = 0#2#0 #random seed
 deltalevmoy = 30 #degre.jours
 deltalevsd = 15
@@ -86,7 +86,7 @@ nbcote = 8#4#16#8#10#9#1#2#
 optdamier = 4#21#
 typearrangement='damier8'#'homogeneous'#'row4_Nsp'#'row4'#'row_Nsp'#'row4_sp2'#'random10'#'random9'#'random8_4'#'damier9'#'damier8_4'#'damier10'#'random8'#'damier8_sp2'#'damier16'#'random16'
 ls_idscenar = [1, 1]#[1, 1, 1] #
-ls_idscenar_sd = [1, 1]#[1, 1, 1] #
+ls_idscenar_sd = [8, 8]#[7, 7]#[6, 6]#[1, 1]#[1, 1, 1] #
 
 tresh_LA = 0.0015 # 0.0010=10cm2 #seuil de surface des feuilles pour separer les folioles dans la grille 3D
 obstarac_ = None #array([[-0.5]*5, [-0.5]*5, [-0.75]*5, [-1.]*5, [-1.]*5]).transpose() #matice 2D de valeurs de profondeur d'obstacle en m #None #
@@ -146,8 +146,16 @@ mn_sc = os.path.join(path_leg,'liste_scenarios.xls')#'scenarios_planMorris.xls')
 
 # lecture scenario variabilite intra et variables associees
 path_variance_geno = os.path.join(path_leg, 'exemple_sd.xls')
-#variance_geno = pd.read_excel(path_variance_geno)
-#ls_parname = list(variance_geno.columns[1:])
+#def param a visualiser
+if opt_sd == 1 or opt_sd == 2:
+    #recup des noms de parametres
+    IDesp_visu = 1#0 #pour Sp1
+    IDparam_visu = 0 # ID du parametre dans la liste
+    IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
+    ls_parnameIV = list(IV_geno.columns[1:])
+    parnameIV_col = ls_parnameIV[IDparam_visu]
+    print('parnameIV', parnameIV_col, ls_parnameIV)
+
 #ls_sdpar = list(pd.read_excel(path_variance_geno).iloc[(0)][ls_parname])
 #moy_modif=3.4875000000000003
 
@@ -2205,7 +2213,7 @@ Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
         
         #insere pour gradient de distrib: gradient selon valeur d'un parametre
         if opt_sd==1 or opt_sd==2:
-            parname = 'Lfeuille'#'Len'#
+            parname = parnameIV_col#'Lfeuille'#'Len'#
             parval = ParamP[nump][parname] #test_retard[nump]#
             vals = IOxls.get_lsparami(ParamP, parname) #test_retard#
             col = 30 + int(7* (parval - min(vals)) / (max(vals)+10E-12 -  min(vals)))
