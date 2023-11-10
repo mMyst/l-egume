@@ -36,7 +36,7 @@ import daily_loop as loop
 import management_auto as mna
 import IOtable
 import IOxls
-#import random
+import random
 import pandas as pd
 import zipfile
 
@@ -48,7 +48,7 @@ opt_residu = 1 #si 0, pas activation de mineralisation
 opt_sd = 0 #1 #genere distribution des valeurs de parametres, 2: fournit CV et calcul SD #1: lecture directe des val de sd independamment de la moy
 opt_covar = 1 # #definie matrice de covariance a lire dans path_variance_matrix (0 opt_sd generere tirages independants)
 opt_shuffle = 0 # 1: for random order of plant species in ParamP ; 0: reular order 
-opt_scenar = 0 #Active option for modifying mean paramter values (0: inactive/default; 1: active)
+opt_scenar = 0 #Active option for modifying np.mean paramter values (0: inactive/default; 1: active)
 opt_stressN = 1 #Active stress N; 1 = stress NNI actif (0= calcule, mais pas applique)
 opt_stressW = 1 #Active stressW; 1 = stress FTSW actif (0= calcule, mais pas applique)
 opt_ReadstressN = 0 # Force stress N to read input values - for debugging/calibration
@@ -410,15 +410,15 @@ def StartEach():
     
     
     #remise a zero m_lais_construct et LAIprofilplant pour nouvelle iteration  
-    m_lais_construct = zeros([n_gamagroup, na[2], na[1], na[0]])
-    m_laiPlt = zeros([len(ParamP), na[2], na[1], na[0]]) #Distrib lai des plantes indivs: nump, Z,Y,,X
+    m_lais_construct = np.zeros([n_gamagroup, na[2], na[1], na[0]])
+    m_laiPlt = np.zeros([len(ParamP), na[2], na[1], na[0]]) #Distrib lai des plantes indivs: nump, Z,Y,,X
     
     LAIp  = {}
     for i in range(0, len(list(SurfprofilPlant[0].keys()))): LAIp[i]=0.
     SurfprofilPlant = [] #liste de LAIprofil par plante
     for i in range(nbplantes): SurfprofilPlant.append(deepcopy(LAIp))
     I_I0profilLfPlant = []
-    for i in range(nbplantes): I_I0profilLfPlant.append(zeros(nbI_I0))
+    for i in range(nbplantes): I_I0profilLfPlant.append(np.zeros(nbI_I0))
     I_I0profilPetPlant = deepcopy(I_I0profilLfPlant)
     I_I0profilInPlant = deepcopy(I_I0profilLfPlant)
     
@@ -590,7 +590,7 @@ def EndEach(lstring,lscene):
     ls_roots = rtd.calc_ls_roots_fromNorm(ls_roots_norm, RLtot= array(invar['RLTotNet']) * 1.) # !*100 pour passer en cm et absorbtion absoption d'N
     # !! ls_roots doit etre en m maintenant! facteur 100. a retirer / laisse en attendant correc calcul longueur debut
     
-    invar['ConcNmoy'] = S.ConcN_roots(ls_roots) #ajout calcul concN dans zone des racines µmole N.L-1
+    invar['ConcNmoy'] = S.ConcN_roots(ls_roots) #ajout calcul concN dans zone des racines ï¿½mole N.L-1
     
     #print('ChangeRoot', max(invar['ChangeRoot']),  max(invar['ChangeRoot'])>0.02)
     # voir si calcul update ls_root a chaque step? -> critere avec ChangeRoot?
@@ -774,11 +774,11 @@ def EndEach(lstring,lscene):
     #mise a jour HR sol (fichier profil)
     if outf['outHRfile'] != 0.:
         matr = S.HRp()#
-        out_HR.append(['HRp', DOY]+mean(matr, axis=1)[id_out,0].tolist())
+        out_HR.append(['HRp', DOY]+np.mean(matr, axis=1)[id_out,0].tolist())
     
     if outf['outFTSWfile'] != 0.:
         matr = S.ftsw_t #S.HRp()#
-        out_HR.append(['FTSW',DOY]+mean(matr, axis=1)[id_out,0].tolist())
+        out_HR.append(['FTSW',DOY]+np.mean(matr, axis=1)[id_out,0].tolist())
     
     if outf['outNO3file'] != 0.:
         matr = S.m_NO3 #S.HRp()#
@@ -790,7 +790,7 @@ def EndEach(lstring,lscene):
     
     if outf['outHRvfile'] != 0.:
         matr = S.HRv_capteur()#
-        out_HR.append(['HRv', DOY]+mean(matr, axis=1)[id_out,0].tolist())
+        out_HR.append(['HRv', DOY]+np.mean(matr, axis=1)[id_out,0].tolist())
     
     #print invar['germination'], invar['TT']
     #print invar_sc['sh']['Surf'], lsSurfSh
@@ -1477,7 +1477,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
         for i in range(len(ls_pts[0])):
             #pt = o3d.RotateAxis (ls_pts[0][i], r_azi, 0)#rotation a faire
             dlp = abs(ls_pts[0][i][1])
-            pt = array([dlp*sin(r_azi), -dlp*cos(r_azi), ls_pts[0][i][2]]) #z inchange - applique rotation azi a x,y
+            pt = array([dlp*np.sin(r_azi), -dlp*np.cos(r_azi), ls_pts[0][i][2]]) #z inchange - applique rotation azi a x,y
             #print(nsh,rank, i, ls_pts[0][i], pt, newpt)
             ls_pts[0][i] = pt + array([X0,Y0,Z0]) #translation point ini feuille
     
@@ -1891,7 +1891,7 @@ RA(nump, nsh, age, rankp, agecum, moduloH):
     #stressHydrique
     Horizmax = int(min([prof_sol_max, prof_obst])/dz_sol)-1
     Horiz = min(int(moduloH/dz_sol), Horizmax)
-    stressH = sh.FTSW_resp(mean(S.ftsw_t[Horiz,:,:]), [ParamP[nump]['WaterTreshElRootss'], ParamP[nump]['WaterTreshElRootsd']])
+    stressH = sh.FTSW_resp(np.mean(S.ftsw_t[Horiz,:,:]), [ParamP[nump]['WaterTreshElRootss'], ParamP[nump]['WaterTreshElRootsd']])
     stressHLim = 0.05 #limite de croissance (a calculer dans ParamP)
     
     #MAJ de RDepth
@@ -1981,7 +1981,7 @@ GetPos(X0,Y0,Z0,nump2)RLAP(nump,nsh,age,rankp,l, Horiz,largVol, longVol, cumdl):
     
     
     #stressHydrique
-    stressH = sh.FTSW_resp(mean(S.ftsw_t[Horiz,:,:]), [ParamP[nump]['WaterTreshElRootss'], ParamP[nump]['WaterTreshElRootsd']])
+    stressH = sh.FTSW_resp(np.mean(S.ftsw_t[Horiz,:,:]), [ParamP[nump]['WaterTreshElRootss'], ParamP[nump]['WaterTreshElRootsd']])
     
     #ajout pondere pour calcul de stress H racinaire global
     invar_sc['ax']['StressHRac'] = IOxls.add_dic({idax:stressH*l}, invar_sc['ax']['StressHRac'])
@@ -2068,7 +2068,7 @@ GetPos(X0,Y0,Z0,nump2)RLAP(nump,nsh,age,rankp,l, Horiz,largVol, longVol, cumdl):
     elif age>ParamP[nump]['delai_AdvRoots'] and statut==0:
         pb = ls_seeds[nump].randgen.uniform(0.,1.)
         if pb<ParamP[nump]['ProbaMaxAdvRoots'] :
-            if mean(S.ftsw_t[Horiz,:,:]) > ParamP[nump]['WaterTreshAdvRoots']:
+            if np.mean(S.ftsw_t[Horiz,:,:]) > ParamP[nump]['WaterTreshAdvRoots']:
                 produce [;(0)SetHead(0,0,-1, -1,0,0)RA(nump,nsh,-1,rankp,0,0)]
             else:
                 produce [GetPos(X0,Y0,Z0,nump)RB(nump,nsh,age+STEPSsol,rankp,1)] #statut
@@ -2078,7 +2078,7 @@ GetPos(X0,Y0,Z0,nump2)RLAP(nump,nsh,age,rankp,l, Horiz,largVol, longVol, cumdl):
         if age>ParamP[nump]['delai_AdvRoots']+ParamP[nump]['fenetre_AdvRoots']:
             produce *
         else:
-            if mean(S.ftsw_t[Horiz,:,:]) > ParamP[nump]['WaterTreshAdvRoots']:
+            if np.mean(S.ftsw_t[Horiz,:,:]) > ParamP[nump]['WaterTreshAdvRoots']:
                 produce [;(0)SetHead(0,0,-1, -1,0,0)RA(nump,nsh,-1,rankp,0,0)]
             else:
                 produce [GetPos(X0,Y0,Z0,nump)RB(nump,nsh,age+STEPSsol,rankp,statut)]
@@ -2107,7 +2107,7 @@ interpretation:
 SHP(nump,nsh,azi, elv0,posi,nbp,par):
     if elv0 < ParamP[nump]['elvtresh'] and par>=meteo_j['I0']*ParamP[nump]['par_tresh']:#pour moduler incli0 par longueur/incli en plante isolee
         Lsh = ParamP[nump]['Len']*nbp
-        Hsh = Lsh*sin(elv0*pi/180.)
+        Hsh = Lsh*np.sin(elv0*pi/180.)
         corr_elv = max(0,(ParamP[nump]['Lmaxeffet']-Hsh))/ParamP[nump]['Lmaxeffet'] 
     elif elv0 < 60 and par<meteo_j['I0']*ParamP[nump]['par_tresh']: #pour moduler incli competition forte/ a revoir au niveau de la loi de ditrib ou de elasticite
         corr_elv =1.#1.3
@@ -2281,12 +2281,12 @@ RLAP(nump,nsh,age,rankp, l, Horiz, largVol, longVol, cumdl):
 solxy(sol_obj, idcol):
     if visu_sol == 1:
         global dz_sol, ncouches_sol, discret_solXY
-        #print mean(sol_obj.HRp(), axis=1)[:,0]#mean(mean(sol_obj.HRp(), axis=0), axis=0)
-        Nmin_xy = mean(sol_obj.m_NO3, axis=1)#mean(sol_obj.m_NO3+sol_obj.m_NH4)/(sol_obj.m_soil_vol*sol_obj.m_DA)*1000, axis=1)
+        #print np.mean(sol_obj.HRp(), axis=1)[:,0]#np.mean(np.mean(sol_obj.HRp(), axis=0), axis=0)
+        Nmin_xy = np.mean(sol_obj.m_NO3, axis=1)#np.mean(sol_obj.m_NO3+sol_obj.m_NH4)/(sol_obj.m_soil_vol*sol_obj.m_DA)*1000, axis=1)
         norm_Nmin_xy = Nmin_xy/Nmin_xy.max()
         norm_Nmin_xy = norm_Nmin_xy[:,idcol]
         
-        ftsw_xy = mean(sol_obj.ftsw_t, axis=1)[:,idcol]
+        ftsw_xy = np.mean(sol_obj.ftsw_t, axis=1)[:,idcol]
         nbcol = discret_solXY[1]
         larg_box = 30.
         
@@ -2295,7 +2295,7 @@ solxy(sol_obj, idcol):
             z = -i*dz_sol
             values = ftsw_xy#norm_Nmin_xy#   A changer pour voir variable de sortie souhaitee
             
-            #ftsw = max(0., mean(sol_obj.ftsw_t[i,:,:]))
+            #ftsw = max(0., np.mean(sol_obj.ftsw_t[i,:,:]))
             ftsw = max(0, values[i])
             col = 16 + int(ceil((1-ftsw)/0.1))
             #nproduce ;(col)@M(-50,0,z-dz_sol)@g(Box(1,30,dz_sol))
@@ -2307,10 +2307,10 @@ sol(sol_obj, nbcol):
     if visu_sol == 1:
         #l'affiche au premier step pour bien definir champs de la camera
         global dz_sol, ncouches_sol
-        #print mean(sol_obj.HRp(), axis=1)[:,0]#mean(mean(sol_obj.HRp(), axis=0), axis=0)
+        #print np.mean(sol_obj.HRp(), axis=1)[:,0]#np.mean(np.mean(sol_obj.HRp(), axis=0), axis=0)
         for i in range(ncouches_sol):
             z = -i*dz_sol
-            ftsw = max(0., mean(sol_obj.ftsw_t[i,:,:]))
+            ftsw = max(0., np.mean(sol_obj.ftsw_t[i,:,:]))
             #ftsw = max(0, ftsw_xy[i])
             col = 16 + int(ceil((1-ftsw)/0.1))
             nproduce ;(col)@M(-53,0,z-dz_sol)@g(Box(1,30,dz_sol))
