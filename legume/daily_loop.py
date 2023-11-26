@@ -1,4 +1,4 @@
-from scipy import *
+#from scipy import *
 import time
 import IOtable
 import IOxls

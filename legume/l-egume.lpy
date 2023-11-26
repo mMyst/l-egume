@@ -16,7 +16,7 @@ sys.path.insert(0, path_leg)
 
 from numpy.random import binomial, seed
 import numpy as np
-from scipy import * 
+#from scipy import * 
 from copy import deepcopy
 import string
 import time
@@ -36,7 +36,7 @@ import daily_loop as loop
 import management_auto as mna
 import IOtable
 import IOxls
-import random
+#import random
 import pandas as pd
 import zipfile
 
@@ -252,7 +252,7 @@ def Start():
     
     ##seed nombre aleatoires
     global Rseed, ls_seeds
-    random.seed(Rseed)
+    np.random.seed(Rseed)
     
     #DOY, TT, TTsol, meteo_j, mng_j, STEPS_, STEPSsol_, ls_epsi, TT_repousse, isTTcut,wasTTcut, isRegrowth, cutNB, Hcut, start_time, past_time, station = init_glob_variables_sim(meteo, mng, DOYdeb)
     DOY, TT, TTsol, meteo_j, mng_j, STEPS_, STEPSsol_, ls_epsi, TT_repousse, isTTcut,wasTTcut, isRegrowth, cutNB, Hcut, start_time, past_time, station = initial.init_glob_variables_simVGL(meteo, mng, DOYdeb, path_station, ongletSta)
