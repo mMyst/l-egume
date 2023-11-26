@@ -59,7 +59,7 @@ To install *riri5* :
 
 * open and activate the *envtest* conda environment with installed dependencies ,
 * go to your local copy of project *riri5* (from https://github.com/glouarn/riri5),
-* or get a copy of the latest model version (from a Git console: git clone -b Develop https://github.com/glouarn/riri5.git)
+* or get a copy of the latest model version (from a Git console: git clone https://github.com/glouarn/riri5.git)
 * run command: 
 	```bash
 	python setup.py develop
@@ -70,7 +70,7 @@ To install *soil3ds* :
 
 * open and activate the *envtest* conda environment with installed dependencies ,
 * go to your local copy of project *soil3ds* (from https://github.com/glouarn/soil3ds),
-* or get a copy of the latest model version (from a Git console: git clone -b Develop https://github.com/glouarn/soil3ds.git)
+* or get a copy of the latest model version (from a Git console: git clone https://github.com/glouarn/soil3ds.git)
 * run command: 
 	```bash
 	python setup.py develop
