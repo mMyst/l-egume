@@ -195,6 +195,8 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     arr = str(ls_usms['typearrangement'][i])
     if arr == 'row4':  # carre rang heterogene
         nbplantes = nbcote * 4
+    elif arr == 'row4_sp1' or arr == 'row4_sp2' :
+        nbplantes = nbcote * 2
     elif arr == 'damier8' or arr == 'damier16' or arr == 'homogeneous' or arr == 'random8' or arr == 'damier9' or arr == 'damier10' or arr == 'damier8_4':  # carre homogene
         nbplantes = nbcote * nbcote
     elif arr == 'damier8_sp1' or arr == 'damier8_sp2' or arr == 'damier16_sp1' or arr == 'damier16_sp2':
