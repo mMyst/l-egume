@@ -237,7 +237,7 @@ def step_epsi(invar, res_trans, lsFeuilBilanR, meteo_j, surfsolref):
     # ls_epsi = invar['parip']/qatot.tolist() #a reprendre : approximatif slmt! -> changera un peu avec un vrai bilan radiatif
     # transmi_sol = 1-sum(ls_epsi)
     # epsi = 1-transmi_sol #a reprendre pour differencier cible et vois #
-    transmi_sol = sum(res_trans[-1][:][:]) / (meteo_j['I0'] * surfsolref)  # bon
+    transmi_sol = np.sum(res_trans[-1][:][:]) / (meteo_j['I0'] * surfsolref)  # bon
     epsi = 1. - transmi_sol  # bon
     ls_epsi = epsi * invar['parip'] / (sum(invar['parip']) + 10e-15)
     return ls_epsi, invar
@@ -255,7 +255,7 @@ def Update_stress_loop(ParamP, invar, invar_sc, temps, DOY, nbplantes, surfsolre
 
     #print('test demandeN', (invar['DemandN_TotAer'] * 1000. + invar['Naerien'])*100. / (invar['MS_aerien'] + aer), invar['MS_aerien'] , aer, invar['DemandN_TotAer'] * 1000. , invar['Naerien'])
     # Uptake N et allocation
-    invar['Nuptake_sol'] = np.array(list(map(sum, ls_Act_Nuptake_plt))) * 1000 + invar['graineN']  # g N.plant-1 #test ls_demandeN_bis*1000.#
+    invar['Nuptake_sol'] = np.array(list(map(np.sum, ls_Act_Nuptake_plt))) * 1000 + invar['graineN']  # g N.plant-1 #test ls_demandeN_bis*1000.#
     try:
         NremobC = invar['remob'] * invar['Npc_piv'] / 100.  # remobilise N pivot qui part avec le C
         invar['Naerien'] += invar['Nuptake_sol'] * fracNaer + NremobC # uptake N va dans partie aeriennes au prorata des demandes
@@ -643,10 +643,10 @@ def distrib_residue_mat_frominvar(ls_mat_res, S, ls_roots, profres, ParamP, inva
 def merge_residue_mat(ls_mat_res, vCC, S):
     # ajout dans la matrice des residus au sol
 
-    if sum(list(map(sum, ls_mat_res))) > 0.:  # si de nouveaux residus (ou supeieur a un seuil
+    if sum(list(map(np.sum, ls_mat_res))) > 0.:  # si de nouveaux residus (ou supeieur a un seuil
         for i in range(len(ls_mat_res)):
             mat_res = ls_mat_res[i]
-            if sum(mat_res) > 0.:
+            if np.sum(mat_res) > 0.:
                 S.mixResMat(mat_res, i, vCC[i])
 
     return S
