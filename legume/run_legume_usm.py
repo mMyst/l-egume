@@ -25,7 +25,7 @@ import getopt
 
 
 #def lsystemInputOutput_usm(path_, fxls_usm, i=0, foldin = 'input', ongletBatch = 'exemple'):
-def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', i=0, path_OUT='output'):
+def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', i=0, path_OUT='output', update_usm_parameters=None):
     """" cree et update l-system en fonction du fichier usm """
 
     # lecture de la liste des usm
@@ -34,6 +34,10 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     usms = IOxls.xlrd.open_workbook(usm_path)
     ls_usms = IOtable.conv_dataframe(IOxls.get_xls_col(usms.sheet_by_name(ongletBatch)))
     #foldin = pour cas ou fichier d'usm dans un sous dossier different de input / tous les autres sont dans input
+
+    if update_usm_parameters is not None:
+        for key, value in update_usm_parameters.items():
+            ls_usms[key][i] = value
 
     #nom fichier en dur (pas en entree de la fonction) + onglet determine par geno
     fscenar = 'liste_scenarios.xls' #'liste_scenarios_exemple.xls'
