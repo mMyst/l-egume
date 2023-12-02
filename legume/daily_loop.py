@@ -7,6 +7,7 @@ import RootDistrib as rtd
 import RootMorpho as rt
 from copy import deepcopy
 import numpy as np
+import os
 
 try:
     from soil3ds import soil_moduleN as solN #import de la version develop si module soil3ds est installe
@@ -584,6 +585,121 @@ def increment_dailyOutput(outvar, invar, DOY, nbplantes, start_time, ls_epsi, ae
 
     return outvar
     # to do: passer ls_epsi, aer, ls_ftsw, ls_transp, Npc dans invar!
+
+
+def sol_dicout_endsim(S, outvar, DOYdeb, DOYend, opt_residu=0):
+    """ close soil balance and prepare output dictionnary - call in End()"""
+    # fermeture des bilans
+    S.CloseWbalance(print_=0)
+    S.CloseNbalance(print_=0)
+    S.CloseCbalance(print_=0)
+    # sys.stdout.close() #!! -> fait planter les print en re-run
+    # en faire une fonction +  ecriture des disctionnaires en Rdata?
+
+    dicout = {}
+    dicout['NRain'] = S.bilanN['cumRain']
+    dicout['NIrrig'] = S.bilanN['cumIrrig']
+    dicout['fertNO3'] = S.bilanN['cumfertNO3']
+    dicout['fertNH4'] = S.bilanN['cumfertNH4']
+    dicout['HumusNMin'] = S.bilanN['cumMinN']
+    if opt_residu == 1:
+        dicout['Res1'] = S.bilanN['cumNRes1']
+        dicout['Res2'] = S.bilanN['cumNRes2']
+        dicout['Res3'] = S.bilanN['cumNRes3']
+        dicout['ResidueMinN'] = S.bilanN['cumNRes1'] + S.bilanN['cumNRes2'] + S.bilanN['cumNRes3']
+        for i in range(len(S.bilanN['NminfromNres'])):
+            dicout['NminfromNres' + str(i)] = S.bilanN['NminfromNres'][i]  # ajout des sorties Nmin par residu
+
+    dicout['Lix'] = S.bilanN['cumLix']
+    # dicout['N2O'] = S.bilanN['cumN2O']
+    dicout['UptPlt'] = list(map(np.sum, S.bilanN['cumUptakePlt']))
+    dicout['azomes'] = S.bilanN['azomes']
+    # serait a formater dans module sol
+
+    # y ajoute les elements du bilan de C plante - mais devrait sortir un fichier separe!
+    dicout['PARa'] = outvar['BilanC_PARa']
+    dicout['RUE'] = outvar['BilanC_RUE']
+    dicout['dMStot'] = outvar['BilanCdMStot']
+    dicout['dMSrac'] = outvar['BilanCdMrac_fine']
+    dicout['dMSpiv'] = outvar['BilanCdMpivot']
+    dicout['dMSaer'] = outvar['BilanCdMaer']
+    dicout['dMSenFeuil'] = outvar['BilanCdMSenFeuil']
+    dicout['dMSenTige'] = outvar['BilanCdMSenTige']
+    dicout['dMSenNonRec'] = outvar['BilanCdMSenNonRec']
+    dicout['dMSenPiv'] = outvar['BilanCdMSenPiv']
+
+    # WB
+    dicout['cumEV'] = S.bilanW['cumEV']
+    dicout['cumTransp'] = S.bilanW['cumTransp']
+    dicout['cumD'] = S.bilanW['cumD']
+
+    dicout['DOY'] = np.array(range(DOYdeb, DOYend))
+
+    return dicout
+
+
+def write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfvar):
+    """ write output csv files - call in End() """
+
+    outvarfile, outBilanNfile, outHRfile, resrootfile, lsorgfile, outMngfile, outsdfile = ls_outf_names
+    outvar, dicout, out_HR, res_root, savelsOrgans, mng, res_sd = ls_objw
+    ls_fileOUT = []  # liste des fichiers ecrits en sortie et affichee en fin de simul
+
+    # ecriture variables journaliere dtoto
+    if outf['outvarfile'] != 0.:
+        outvarpath = os.path.join(path_out, outvarfile)  # r'H:\devel\grassland\grassland\L-gume\toto.csv'
+
+        # valide cles active via fichier d'entree
+        ls_keyvar = ['colnames']
+        for i in range(1, len(ls_keyvar_pot)):
+            k = ls_keyvar_pot[i]
+            if outfvar[k] != 0.:
+                ls_keyvar.append(k)
+
+        # ecrit fichier avec variables selectionnees
+        IOtable.write_dicttables(outvarpath, outvar, ls_keyvar)
+        ls_fileOUT.append(outvarpath)
+
+    # ecriture bilan sol
+    if outf['outBilanNfile'] != 0.:
+        IOtable.write_dict(dicout, path_out, outBilanNfile)
+        ls_fileOUT.append(os.path.join(path_out, outBilanNfile))
+
+    # ecriture profils sol
+    if outf['outHRfile'] != 0. or outf['outFTSWfile'] != 0. or outf['outNO3file'] != 0. or outf['outNH4file'] != 0.:
+        outHRpath = os.path.join(path_out, outHRfile)  # r'H:\devel\grassland\grassland\L-gume\outHR.csv'
+        f = open(outHRpath, 'w')  # file (outHRpath, 'w')
+        IOtable.ecriture_csv(out_HR, f)  # ls_systrac[0]
+        f.close()
+        ls_fileOUT.append(outHRpath)
+
+    # ecriture en sortie du profil racinaire
+    if outf['resrootfile'] != 0.:
+        resrootpath = os.path.join(path_out, resrootfile)  # r'H:\devel\grassland\newres.csv'
+        f = open(resrootpath, 'w')  # file (resrootpath, 'w')#r'H:\devel\grassland\newres.csv'
+        IOtable.ecriture_csv(res_root, f)
+        f.close()
+        ls_fileOUT.append(resrootpath)
+
+    # ecriture info organes
+    if outf['lsorgfile'] != 0.:
+        lsorgpath = os.path.join(path_out, lsorgfile)  # r'H:\devel\grassland\grassland\L-gume\lsAxes.csv'
+        f = open(lsorgpath, 'w')  # file (lsorgpath, 'w')
+        IOtable.ecriture_csv_fromlist(savelsOrgans, f)  # savelsOrgans=liste des lsOrgans pour chaque iteration #lsOrgans #lsAxes #lsApex #lsApexStop #ls_systrac[0]
+        f.close()
+        ls_fileOUT.append(lsorgpath)
+
+    # ecriture mng
+    if outf['outMngfile'] != 0.:
+        IOtable.write_dict(mng, path_out, outMngfile)
+        ls_fileOUT.append(os.path.join(path_out, outMngfile))
+
+    # ecriture parametres avec opt sd
+    if outf['outsdfile'] != 0.:  # valeur de parametres par plante
+        IOtable.write_dict(res_sd, path_out, outsdfile)
+        ls_fileOUT.append(os.path.join(path_out, outsdfile))
+
+    return ls_fileOUT
 
 
 def distrib_residue_mat_frominvar(ls_mat_res, S, ls_roots, profres, ParamP, invar, opt_stressGel):

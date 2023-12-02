@@ -706,6 +706,48 @@ def init_variables_plantes(ParamP, nbplantes, na):
     return invar, invar_sc, lsAxes, lsApex, lsApexStop, lsApexAll, lsOrgans, savelsOrgans, lsFeuilBilanR, ls_systrac, ls_ftswStress, ls_NNIStress, ls_TStress, LAIprofil, SurfprofilPlant, deltaI_I0, nbI_I0, I_I0Classes, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NaClasses, NlClasses, NlinClasses, res_root, ls_roots_prev, epsilon
 
 
+def mef_res_sd(ParamP, ls_Spe, path_variance_geno, test_retard, carto, opt_sd):
+    """ mise en forme d'un tableau avec position, retard et parametre des plantes indiv"""
+
+    if opt_sd != 0:
+        # ls_parname = ['name']+['Len'] # a recuperer=la bonne liste
+        sd_fichier_g4 = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[0])
+        ls_parname = ['name'] + list(sd_fichier_g4.columns)[
+                                1:]  # liste les noms de colonne a  partir de la deuxieme; suppose la meme pour les 2 sp
+        nbp = len(IOxls.get_lsparami(ParamP, 'name'))
+        res_sd = {'nump': range(0, nbp)}
+        res_sd['retard'] = test_retard[0:nbp]
+        for p in ls_parname:
+            res_sd[p] = IOxls.get_lsparami(ParamP, p)
+
+        # ajout des coord x,y des plantes
+        xcarto, ycarto = [], []
+        for i in range(len(carto)):
+            xcarto.append(carto[i][0]);
+            ycarto.append(carto[i][1])
+
+        res_sd['x'] = xcarto
+        res_sd['y'] = ycarto
+
+    else:  # si pas opt_sd
+        nbp = len(IOxls.get_lsparami(ParamP, 'name'))
+        res_sd = {'nump': range(0, nbp)}
+        res_sd['retard'] = test_retard[0:nbp]
+        # ajout des coord x,y des plantes
+        xcarto, ycarto = [], []
+        for i in range(len(carto)):
+            xcarto.append(carto[i][0]);
+            ycarto.append(carto[i][1])
+
+        res_sd['x'] = xcarto
+        res_sd['y'] = ycarto
+
+    return res_sd
+
+
+
+
+
 def init_outputs(ParamP, nbplantes, ncouches_sol, surfsolref):
     """
 

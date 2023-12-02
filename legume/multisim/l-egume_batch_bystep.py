@@ -23,6 +23,7 @@ import IOtable
 import run_legume_usm as runl
 import ShootMorpho as sh
 import daily_loop as loop
+import initialisation as initial
 import numpy as np
 
 from soil3ds import soil_moduleN as solN
@@ -835,7 +836,7 @@ def runl2systemLightSoil_bystep(n, m):
 
         # refait initialisation des residues au step 1 avec ensemble des plante (ParamP commun)
         if i == 1 and opt_residu == 1:
-            CC = sh.init_plant_residues_fromParamP(S, opt_residu, ParamP)
+            CC = initial.init_plant_residues_fromParamP(S, opt_residu, ParamP, par_SN)
 
 
         if opt_residu == 1:  # option residu activee: mise a jour des cres
