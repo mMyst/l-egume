@@ -171,7 +171,7 @@ def daily_growth_loop(ParamP, invar, outvar, ls_epsi, meteo_j, mng_j, nbplantes,
 
     ls_demandeN_aer, NcritTot_, MStot_ = solN.demandeNdefaut2(MSp=np.array(invar['MS_aerien'])-np.array(aer), dMSp=aer, Npc=Npc_aer, surfsolref=surfsolref, a=np.array(IOxls.get_lsparami(ParamP, 'ADIL')), b1=np.array(IOxls.get_lsparami(ParamP, 'BDILi')), b2=np.array(IOxls.get_lsparami(ParamP, 'BDIL')), MStot_extern=MStot_extern)
     #ls_demandeN_aer, NcritTot_, MStot_ = solN.demandeNdefaut2(MSp=array(MS_aerien_tm1), dMSp=aer, Npc=Npc_aer, surfsolref=surfsolref, a=array(IOxls.get_lsparami(ParamP, 'ADIL')), b1=array(IOxls.get_lsparami(ParamP, 'BDILi')), b2=array(IOxls.get_lsparami(ParamP, 'BDIL')))
-    print('Ncrit', NcritTot_, MStot_)
+    #print('Ncrit', NcritTot_, MStot_)
     ls_demandeN_aer = ls_demandeN_aer * 0.001 #+ 1e-15  # en kg N.plant-1
     ls_demandN_piv = solN.demandeNroot(np.array(invar['MS_pivot']), pivot, Npc_piv, surfsolref, np.array(IOxls.get_lsparami(ParamP, 'NoptPiv'))) * 0.001 + epsilon #+ 1e-15  # en kg N.plant-1
     ls_demandN_rac_fine = solN.demandeNroot(np.array(invar['MS_rac_fine']), rac_fine, Npc_rac_fine, surfsolref, np.array(IOxls.get_lsparami(ParamP, 'NoptFR'))) * 0.001 #+ 1e-15  # en kg N.plant-1

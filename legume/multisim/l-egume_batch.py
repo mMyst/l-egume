@@ -67,9 +67,9 @@ elif opttest == 'mayssa':
 else:  # to personalize - other multisimulation to be defined (0)
     # global foldin, fxls, ongletBatch, fscenar
     # to be manually updated
-    foldin =  r'C:\devel\test\multisim'#r'C:\inputs\inputs test variance BLW'#os.path.join(path_, 'input')#'input'  # 'multisim'
-    fxls = 'liste_usms_exemple.xls'#'liste_usms_essais.xls'  # 'liste_usms_mix.xls'
-    ongletBatch = 'testMultisim'#'Param1GL'#'OATbea'#'Histor'#'Champs'  # 'SimTest'#
+    foldin =  r'H:\Travail\simul\singularity containers\inputs 6bea25l'#r'C:\devel\test\multisim'#r'C:\inputs\inputs test variance BLW'#os.path.join(path_, 'input')#'input'  # 'multisim'
+    fxls = 'newUSM_plan_compet.xls'#'liste_usms_exemple.xls'#'liste_usms_essais.xls'  # 'liste_usms_mix.xls'
+    ongletBatch = '1v1Var'#'testMultisim'#'Param1GL'#'OATbea'#'Histor'#'Champs'  # 'SimTest'#
     foldout = os.path.join(path_, 'output')
 
 #scenar et fsd definis en dur dans la fonction lsystemInputOutput_usm

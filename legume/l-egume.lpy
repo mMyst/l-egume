@@ -146,15 +146,16 @@ mn_sc = os.path.join(path_leg,'liste_scenarios.xls')#'liste_scenarios_exemple.xl
 
 # lecture scenario variabilite intra et variables associees
 path_variance_geno = os.path.join(path_leg, 'exemple_sd.xls')
-#def param a visualiser
-if opt_sd == 1 or opt_sd == 2:
-    #recup des noms de parametres
-    IDesp_visu = 1#0 #pour Sp1
-    IDparam_visu = 0 # ID du parametre dans la liste
-    IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
-    ls_parnameIV = list(IV_geno.columns[1:])
-    parnameIV_col = ls_parnameIV[IDparam_visu]
-    print('parnameIV', parnameIV_col, ls_parnameIV)
+
+##def param a visualiser
+#if opt_sd == 1 or opt_sd == 2:
+#    #recup des noms de parametres
+#    IDesp_visu = 1#0 #pour Sp1
+#    IDparam_visu = 0 # ID du parametre dans la liste
+#    IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
+#    ls_parnameIV = list(IV_geno.columns[1:])
+#    parnameIV_col = ls_parnameIV[IDparam_visu]
+#    print('parnameIV', parnameIV_col, ls_parnameIV)
 
 #ls_sdpar = list(pd.read_excel(path_variance_geno).iloc[(0)][ls_parname])
 #moy_modif=3.4875000000000003
@@ -327,6 +328,16 @@ def Start():
     ls_roots_norm = rtd.build_ls_roots_mult(array(invar['RLTotNet']) * 1. + 10e-15, ls_systrac, lims_sol, optNorm=1)
     ls_roots_prev = rtd.calc_ls_roots_fromNorm(ls_roots_norm, RLtot= array(invar['RLTotNet']) * 1.) # !*100 pour passer en cm et absorbtion absoption d'N
     
+    #def param a visualiser
+    global parnameIV_col
+    if opt_sd == 1 or opt_sd == 2:
+        #recup des noms de parametres
+        IDesp_visu = 1#0 #pour Sp1
+        IDparam_visu = 0 # ID du parametre dans la liste
+        IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
+        ls_parnameIV = list(IV_geno.columns[1:])        
+        parnameIV_col = ls_parnameIV[IDparam_visu]
+        print('parnameIV', parnameIV_col, ls_parnameIV)
     
     
     #initialisation des sorties
@@ -634,7 +645,7 @@ def EndEach(lstring,lscene):
     
     # tag pour recup MStot autres plantes en couplage externe
     #MStot_extern = 0. # T.ha-1
-    print('in MStot_extern', MStot_extern)
+    #print('in MStot_extern', MStot_extern)
     
     tag_loop_inputs = [invar, outvar, invar_sc, ParamP, station, carto,  meteo_j, mng_j, DOY, cutNB, start_time, nbplantes, surfsolref, m_lais, dicFeuilBilanR, surf_refVOX,  triplets , ls_dif, S, par_SN, lims_sol, ls_roots, ls_mat_res, vCC, ls_ftswStress, ls_NNIStress, ls_TStress, lsApex, lsApexAll, dicOrgans, deltaI_I0, nbI_I0, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NlClasses, NaClasses, NlinClasses, opt_stressW, opt_stressN, opt_stressGel, opt_residu, dxyz]
     
