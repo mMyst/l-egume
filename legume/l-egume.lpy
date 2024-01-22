@@ -1094,7 +1094,7 @@ GetPos(X0,Y0,Z0,nump2)A(nump,nsh,statut, age, duromb, rank, rgeq, phyllotax):
     dX, dY = X0-carto[nump][0],Y0-carto[nump][1]
     dist2 =  dX*dX+dY*dY
     if dist2 > invar['Dplante'][nump]**2:
-        invar['Dplante'][nump] = sqrt(dist2)
+        invar['Dplante'][nump] = np.sqrt(dist2)
     
     vox = riri.WhichVoxel(array([X0,Y0,Z0]), origin_grid, na, dxyz)
     PARup = meteo_j['I0'] if vox[2] == 1 else res_trans[vox[2]-1][vox[1]][vox[0]] / surf_refVOX
@@ -1333,7 +1333,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
     dX, dY = X0-carto[nump][0],Y0-carto[nump][1]
     dist2 =  dX*dX+dY*dY
     if dist2 > invar['Dplante'][nump]**2:
-        invar['Dplante'][nump] = sqrt(dist2)
+        invar['Dplante'][nump] = np.sqrt(dist2)
     
     #calul surface
     surF = sh.calc_surF(ParamP[nump], rank, rankp, ordre, l-Lcut, type=ParamP[nump]['type']) #m2
@@ -2124,7 +2124,7 @@ Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
         #choix du geom
         if int(ParamP[nump]['type'])==1 or int(ParamP[nump]['type'])==2 : #legume or non fixing-legume
             if opt_Trud == 1: #corrige leafshape effect pour feuille detaillee de legumineuse
-                cor_lF = sqrt(ParamP[nump]['leafshape'] / 0.5)
+                cor_lF = np.sqrt(ParamP[nump]['leafshape'] / 0.5)
                 Long = Long * (1/cor_lF)
                 Larg  = Larg * (1/cor_lF)
             
