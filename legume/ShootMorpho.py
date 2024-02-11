@@ -829,13 +829,14 @@ def MaturBud(delaiMaturBud, NIparent, delta=4):
 ################
 # Planter - initialisation scene
 
-def planter_coordinates(type, cote, nbcote, orientRow='X'):
+def planter_coordinates(type, cote, nbcote, orientRow='X', forceCarto = None):
     """
 
     :param type:
     :param cote:
     :param nbcote:
     :param orientRow:
+    :param forceCarto:
     :return: carto, list of nd.arrays for the 3D coordiantes of each plant in the scene
     """
     distplantes = cote / nbcote  # 1. #cm
@@ -843,8 +844,9 @@ def planter_coordinates(type, cote, nbcote, orientRow='X'):
     # pour grand rhizotron
     # yyy = [-12.25, 4.4, 21.05]
     # xxx = [-10.75, -8.35, -5.95, -3.55, -1.15, 1.25, 3.65, 6.05, 8.45, 10.85]
-
-    if type == 'row4' or type=='row4_sp1' or type=='row4_sp2':  # pour carre 4 rangs heterogenes
+    if forceCarto is not None: # si force une carto via forceCarto
+        carto = forceCarto
+    elif type == 'row4' or type=='row4_sp1' or type=='row4_sp2':  # pour carre 4 rangs heterogenes
         Param_, carto = row4([1, 2], Lrow=cote, nbprow=nbcote, orientRow=orientRow)
     elif type == 'row4_Nsp' :  # pour carre 4 rangs heterogenes
         Param_, carto = row4_Nsp([1, 2], Lrow=cote, nbprow=nbcote, orientRow=orientRow)
@@ -888,7 +890,7 @@ def regular_square(nbcote, distplantes):
     return carto
 
 
-def planter_order_ParamP(ls_g, type, nbcote, opt, shuffle=0):
+def planter_order_ParamP(ls_g, type, nbcote, opt, shuffle=0, forceOrder=None):
     """
 
     :param ls_g:
@@ -897,10 +899,17 @@ def planter_order_ParamP(ls_g, type, nbcote, opt, shuffle=0):
     :param opt:
     :param speby_row:
     :param shuffle:
+    :param forceOrder:
     :return: ParamP, list of plant parameter dictionnaries for each plant in the scene
     """
+    if forceOrder is not None: # si force une carto via forceCarto
+        # forceOrder: liste de nump id dans ls_g
+        ParamP = []
+        for i in forceOrder:
+            ParamP.append(ls_g[i])
 
-    if type == 'homogeneous':  # cas d'un couvert monospe homogene: prend premier parametrage
+        #print('len',len(ParamP), IOxls.get_lsparami(ParamP, 'name'))
+    elif type == 'homogeneous':  # cas d'un couvert monospe homogene: prend premier parametrage
         ParamP = [ls_g[0]] * nbcote * nbcote
     elif type == 'damier8' or type == 'random8' or type == 'damier8_sp1' or type == 'damier8_sp2':  # damier binaire 64 plantes
         if nbcote == 8:

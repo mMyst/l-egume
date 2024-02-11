@@ -86,7 +86,7 @@ nbcote = 8#4#16#8#10#9#1#2#
 optdamier = 4#21#
 typearrangement='damier8'#'homogeneous'#'row4_Nsp'#'row4'#'row_Nsp'#'row4_sp2'#'random10'#'random9'#'random8_4'#'damier9'#'damier8_4'#'damier10'#'random8'#'damier8_sp2'#'damier16'#'random16'
 ls_idscenar = [1, 1]#[1, 1, 1] #
-ls_idscenar_sd = [8, 8]#[7, 7]#[6, 6]#[1, 1]#[1, 1, 1] #
+ls_idscenar_sd = [1, 1]#[8, 8]#[7, 7]#[6, 6]#[1, 1, 1] #
 
 tresh_LA = 0.0015 # 0.0010=10cm2 #seuil de surface des feuilles pour separer les folioles dans la grille 3D
 obstarac_ = None #array([[-0.5]*5, [-0.5]*5, [-0.75]*5, [-1.]*5, [-1.]*5]).transpose() #matice 2D de valeurs de profondeur d'obstacle en m #None #
@@ -95,6 +95,8 @@ Countstep_rac = 0 #counter depuis last update root distribution
 dllimmin = 1. #cm #minimun dlcum before updating root volume
 TreshChangeRoot = 0.5 #cm # minimum to update ls_roots
 noiseGeom = [0.001, 0.001, 0.001] #[15., 20., 20.] #[35., 30., 30.] #[phyllotaxy, IncPet, gammaFeuil] #en degre -> pour bruit sur geometrie
+forceCarto = None #[np.array([1.,2.,0.]), np.array([11.,2.,0.]), np.array([7.,7.,0.])] # ! doit etre des float
+forceOrder =  None #[0,0,0] #
 
 
 ## lecture fichier meteo
@@ -268,10 +270,10 @@ def Start():
     #typearrangement='damier8' 
     
     print('lspe', ls_Spe)
-    ParamP, nbplantes, ls_seeds, lsidP, test_retard = initial.init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=Rseed ,type=typearrangement, opt=optdamier, opt_scenar=opt_scenar, ls_idscenar=ls_idscenar, mn_sc=mn_sc, opt_sd=opt_sd, opt_covar=opt_covar, path_variance_geno=path_variance_geno, path_variance_matrix=path_variance_matrix, ls_idscenar_sd=ls_idscenar_sd, opt_shuffle=opt_shuffle)
+    ParamP, nbplantes, ls_seeds, lsidP, test_retard = initial.init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=Rseed ,type=typearrangement, opt=optdamier, opt_scenar=opt_scenar, ls_idscenar=ls_idscenar, mn_sc=mn_sc, opt_sd=opt_sd, opt_covar=opt_covar, path_variance_geno=path_variance_geno, path_variance_matrix=path_variance_matrix, ls_idscenar_sd=ls_idscenar_sd, opt_shuffle=opt_shuffle,forceOrder=forceOrder)
     
     
-    #print('name2 ', IOxls.get_lsparami(ParamP, 'name'))
+    print('name2 ', IOxls.get_lsparami(ParamP, 'name'))
     #si graminee, trajectoire normalisee feuille L=1 - 1 par parametre plante
     ls_pointes1 = []
     for nump in range(nbplantes):
@@ -286,7 +288,7 @@ def Start():
     #initialisation de la scene
     global carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr 
     
-    carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr = initial.init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP, type=typearrangement)
+    carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr = initial.init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP,  type=typearrangement, forceCarto=forceCarto)
     
     print('carto', len(carto), carto)
     
