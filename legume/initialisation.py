@@ -145,11 +145,12 @@ def init_sol_fromLpy(inis, meteo_j, par_sol, par_SN, discret_solXY, dz_sol, patt
 
 
 
-def init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP, type='damier8'):
+def init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP,  type='damier8', forceCarto=None):
     # initialoise la scene L-egume: arrangement des plantes (carto), discretisation souterraine, discretisation aerienne
     # 1) CARTO
     distplantes = cote / nbcote  # 1. #cm
-    carto = sh.planter_coordinates(type, cote, nbcote)
+    carto = sh.planter_coordinates(type, cote, nbcote, orientRow='X', forceCarto=forceCarto)
+    print("ici carto", carto)
 
     # reduit a une espece si veut simul separee
     if type == 'damier8_sp1' or type == 'damier8_sp2' or type == 'damier16_sp1' or type == 'damier16_sp2' or 'row4_sp1' or 'row4_sp2':
@@ -430,7 +431,7 @@ def init_ParamP_VGL_old(path_plante, ongletP, ongletPvois, nbcote, deltalevmoy, 
     return ParamP, nbplantes, ls_seeds, lsidP, test_retard
 
 #pour liste espece
-def init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=0, type='homogeneous', opt=4, opt_scenar=0, ls_idscenar=[1, 1], mn_sc=None, opt_sd=0, opt_covar=0, path_variance_geno=None, path_variance_matrix=None, ls_idscenar_sd=[None, None], opt_shuffle=0):
+def init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=0, type='homogeneous', opt=4, opt_scenar=0, ls_idscenar=[1, 1], mn_sc=None, opt_sd=0, opt_covar=0, path_variance_geno=None, path_variance_matrix=None, ls_idscenar_sd=[None, None], opt_shuffle=0, forceOrder=None):
     """ """
     # nbcote = nombre de plante sur un cote en supposant repartition homogene
 
@@ -448,7 +449,7 @@ def init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_se
         ls_g.append(g)
 
 
-    ParamP = sh.planter_order_ParamP(ls_g, type, nbcote, opt, opt_shuffle)
+    ParamP = sh.planter_order_ParamP(ls_g, type, nbcote, opt, opt_shuffle, forceOrder=forceOrder)
 
     # 2) modif ParamP et ajout variabilite sd si opt_sd==1 (variabilite intra) ; possible seulement si pas analyse de sensibilite (onglet scenar=default)
     # test pour esp 1, Len avec sd=0.5

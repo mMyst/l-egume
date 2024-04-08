@@ -44,7 +44,7 @@ import zipfile
 
 
 #options de simulation
-opt_residu = 1 #si 0, pas activation de mineralisation
+opt_residu = 0 #si 0, pas activation de mineralisation
 opt_sd = 0 #1 #genere distribution des valeurs de parametres, 2: fournit CV et calcul SD #1: lecture directe des val de sd independamment de la moy
 opt_covar = 1 # #definie matrice de covariance a lire dans path_variance_matrix (0 opt_sd generere tirages independants)
 opt_shuffle = 0 # 1: for random order of plant species in ParamP ; 0: reular order 
@@ -58,7 +58,7 @@ opt_stressGel = 1 #Active gel stress option below Tgel
 opt_optT = 0 #option de calcul du cumul de temperature (0=betaD; 1=betaH; 2=lineaireD)
 opt_PP = 1 #0 #Active photoperiodic effects (1 active; 0 inactive)
 opt_Mng = 0 # type of management file to be read: 0: default observed file ; 1: automatic management file #must be consistent with the management file!
-opt_Nuptake = 1# #options for calculating plant N uptake - 0:'STICS' #1:'LocalTransporter' #2:'old'
+opt_Nuptake = 0#1# #options for calculating plant N uptake - 0:'STICS' #1:'LocalTransporter' #2:'old'
 opt_ReadPP = 0 # Force photoperiod to read input values in management - for indoor experiment
 visu_root=1 #1# pour visualisation/interpretation root
 visu_shoot=1 #1# pour visualisation/interpretation shoot
@@ -75,7 +75,7 @@ opt_external_coupling = 0 # 1 for environmental coupling out of lpy; 0 for inter
 
 #initialisation des variables globale de simulation
 DOYdeb = 60#100#49#159#124#
-DOYend = 135#335#180#202#231#335#610#120#250#244#282#
+DOYend = 135#160#180#335#202#231#335#610#120#250#244#282#
 Rseed = 0#2#0 #random seed
 deltalevmoy = 30 #degre.jours
 deltalevsd = 15
@@ -86,7 +86,7 @@ nbcote = 8#4#16#8#10#9#1#2#
 optdamier = 4#21#
 typearrangement='damier8'#'homogeneous'#'row4_Nsp'#'row4'#'row_Nsp'#'row4_sp2'#'random10'#'random9'#'random8_4'#'damier9'#'damier8_4'#'damier10'#'random8'#'damier8_sp2'#'damier16'#'random16'
 ls_idscenar = [1, 1]#[1, 1, 1] #
-ls_idscenar_sd = [8, 8]#[7, 7]#[6, 6]#[1, 1]#[1, 1, 1] #
+ls_idscenar_sd = [1, 1]#[8, 8]#[7, 7]#[6, 6]#[1, 1, 1] #
 
 tresh_LA = 0.0015 # 0.0010=10cm2 #seuil de surface des feuilles pour separer les folioles dans la grille 3D
 obstarac_ = None #array([[-0.5]*5, [-0.5]*5, [-0.75]*5, [-1.]*5, [-1.]*5]).transpose() #matice 2D de valeurs de profondeur d'obstacle en m #None #
@@ -95,6 +95,8 @@ Countstep_rac = 0 #counter depuis last update root distribution
 dllimmin = 1. #cm #minimun dlcum before updating root volume
 TreshChangeRoot = 0.5 #cm # minimum to update ls_roots
 noiseGeom = [0.001, 0.001, 0.001] #[15., 20., 20.] #[35., 30., 30.] #[phyllotaxy, IncPet, gammaFeuil] #en degre -> pour bruit sur geometrie
+forceCarto = None #[np.array([1.,2.,0.]), np.array([11.,2.,0.]), np.array([7.,7.,0.])] # ! doit etre des float
+forceOrder =  None #[0,0,0] #
 
 
 ## lecture fichier meteo
@@ -140,21 +142,22 @@ par_SN, par_sol = IOxls.read_sol_param(path_sol, ongletS)
 par_SN['concrr'] = 0.#force eau de pluie / irrig a zero N, sinon apport 300 kg en irrigue!
 
 #lecture scenario valeur moyenne (si changement de parametres)
-mn_sc = os.path.join(path_leg,'liste_scenarios.xls')#'scenarios_planMorris.xls')#'liste_scenarios_exemple.xls')#(path_leg,'liste_scenarios.xls')'Fet'#
+mn_sc = os.path.join(path_leg,'liste_scenarios.xls')#'liste_scenarios_exemple.xls')#'scenarios_planMorris.xls')#(path_leg,'liste_scenarios.xls')'Fet'#
 #ongletScenar1 = 'Fix2'#'Orca'#'TB'#'default'#'nonFixSimTest'#'default'#'formica'#
 #ongletScenar2 = 'nonFixSimTest'#'Fet'#'Orca'#'TB'#'Orca2'#'default'#'OrcaVois'#'default'#'nonFix1'#'default'#'formica'#
 
 # lecture scenario variabilite intra et variables associees
 path_variance_geno = os.path.join(path_leg, 'exemple_sd.xls')
-#def param a visualiser
-if opt_sd == 1 or opt_sd == 2:
-    #recup des noms de parametres
-    IDesp_visu = 1#0 #pour Sp1
-    IDparam_visu = 0 # ID du parametre dans la liste
-    IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
-    ls_parnameIV = list(IV_geno.columns[1:])
-    parnameIV_col = ls_parnameIV[IDparam_visu]
-    print('parnameIV', parnameIV_col, ls_parnameIV)
+
+##def param a visualiser
+#if opt_sd == 1 or opt_sd == 2:
+#    #recup des noms de parametres
+#    IDesp_visu = 1#0 #pour Sp1
+#    IDparam_visu = 0 # ID du parametre dans la liste
+#    IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
+#    ls_parnameIV = list(IV_geno.columns[1:])
+#    parnameIV_col = ls_parnameIV[IDparam_visu]
+#    print('parnameIV', parnameIV_col, ls_parnameIV)
 
 #ls_sdpar = list(pd.read_excel(path_variance_geno).iloc[(0)][ls_parname])
 #moy_modif=3.4875000000000003
@@ -267,10 +270,10 @@ def Start():
     #typearrangement='damier8' 
     
     print('lspe', ls_Spe)
-    ParamP, nbplantes, ls_seeds, lsidP, test_retard = initial.init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=Rseed ,type=typearrangement, opt=optdamier, opt_scenar=opt_scenar, ls_idscenar=ls_idscenar, mn_sc=mn_sc, opt_sd=opt_sd, opt_covar=opt_covar, path_variance_geno=path_variance_geno, path_variance_matrix=path_variance_matrix, ls_idscenar_sd=ls_idscenar_sd, opt_shuffle=opt_shuffle)
+    ParamP, nbplantes, ls_seeds, lsidP, test_retard = initial.init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=Rseed ,type=typearrangement, opt=optdamier, opt_scenar=opt_scenar, ls_idscenar=ls_idscenar, mn_sc=mn_sc, opt_sd=opt_sd, opt_covar=opt_covar, path_variance_geno=path_variance_geno, path_variance_matrix=path_variance_matrix, ls_idscenar_sd=ls_idscenar_sd, opt_shuffle=opt_shuffle,forceOrder=forceOrder)
     
     
-    #print('name2 ', IOxls.get_lsparami(ParamP, 'name'))
+    print('name2 ', IOxls.get_lsparami(ParamP, 'name'))
     #si graminee, trajectoire normalisee feuille L=1 - 1 par parametre plante
     ls_pointes1 = []
     for nump in range(nbplantes):
@@ -285,7 +288,7 @@ def Start():
     #initialisation de la scene
     global carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr 
     
-    carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr = initial.init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP, type=typearrangement)
+    carto, distplantes, pattern8, Lsol, largsol, surfsolref, dz_sol, ncouches_sol, prof_sol_max, discret_solXY, lims_sol, ls_gammagroup, setp, n_gamagroup, na, dxyz, lims_aer, origin_grid, surf_refVOX, m_lais, m_lais_construct, m_laiPlt, triplets, ls_dif, res_trans, res_abs_i, res_rfr = initial.init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP,  type=typearrangement, forceCarto=forceCarto)
     
     print('carto', len(carto), carto)
     
@@ -305,10 +308,11 @@ def Start():
     #print(S.m_frac_evapZ)
     
     #initialisation des variables d'etat plante
-    global invar, invar_sc, lsAxes, lsApex, lsApexStop, lsApexAll, lsOrgans, savelsOrgans,lsFeuilBilanR , ls_systrac, ls_ftswStress, ls_NNIStress,ls_TStress, LAIprofil, SurfprofilPlant, deltaI_I0, nbI_I0, I_I0Classes, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NaClasses, NlClasses, NlinClasses, res_root, ls_roots_prev
+    global invar, invar_sc, lsAxes, lsApex, lsApexStop, lsApexAll, lsOrgans, savelsOrgans,lsFeuilBilanR , ls_systrac, ls_ftswStress, ls_NNIStress,ls_TStress, LAIprofil, SurfprofilPlant, deltaI_I0, nbI_I0, I_I0Classes, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NaClasses, NlClasses, NlinClasses, res_root, ls_roots_prev, MStot_extern
     
     invar, invar_sc, lsAxes, lsApex, lsApexStop, lsApexAll, lsOrgans, savelsOrgans,lsFeuilBilanR , ls_systrac, ls_ftswStress, ls_NNIStress, ls_TStress, LAIprofil, SurfprofilPlant, deltaI_I0, nbI_I0, I_I0Classes, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NaClasses, NlClasses, NlinClasses, res_root, ls_roots_prev, epsilon = initial.init_variables_plantes(ParamP, nbplantes, na)
     
+    MStot_extern = 0. # T.ha-1
     
     #initialisation des variables d'echange avec exterieur pour couplages sol/rayonnement
     global tag_inputs_soil_step, res_soil_step, tag_inputs_residue_updt, res_residue_step, local_res_trans, local_res_abs_i, tag_light_inputs2, local_res_rfr, tag_light_inputs, tag_loop_inputs
@@ -326,6 +330,16 @@ def Start():
     ls_roots_norm = rtd.build_ls_roots_mult(array(invar['RLTotNet']) * 1. + 10e-15, ls_systrac, lims_sol, optNorm=1)
     ls_roots_prev = rtd.calc_ls_roots_fromNorm(ls_roots_norm, RLtot= array(invar['RLTotNet']) * 1.) # !*100 pour passer en cm et absorbtion absoption d'N
     
+    #def param a visualiser
+    global parnameIV_col
+    if opt_sd == 1 or opt_sd == 2:
+        #recup des noms de parametres
+        IDesp_visu = 1#0 #pour Sp1
+        IDparam_visu = 0 # ID du parametre dans la liste
+        IV_geno = pd.read_excel(path_variance_geno, sheet_name=ls_Spe[IDesp_visu]) 
+        ls_parnameIV = list(IV_geno.columns[1:])        
+        parnameIV_col = ls_parnameIV[IDparam_visu]
+        print('parnameIV', parnameIV_col, ls_parnameIV)
     
     
     #initialisation des sorties
@@ -554,7 +568,7 @@ def StartEach():
 def EndEach(lstring,lscene):
     
     
-    global S, Uval, stateEV, DOY, meteo_j, mng_j, PP, res_root, nbplantes, surfsolref, ls_ftswStress, past_time, lsOrgans, ls_NNIStress, ls_TStress,ls_mat_res
+    global S, Uval, stateEV, DOY, meteo_j, mng_j, PP, res_root, nbplantes, surfsolref, ls_ftswStress, past_time, lsOrgans, ls_NNIStress, ls_TStress,ls_mat_res, MStot_extern
     global lsApex, lsApexAll, ls_systrac, lims_sol, b_, opt_residu, vCC, carto, start_time, cutNB, I_I0profilInPlant, deltaI_I0, nbI_I0, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NlClasses, NaClasses, NlinClasses
     global ParamP, par_SN, invar, invar_sc, outvar, res_trans, ls_roots_prev, Maxstep_rac, Countstep_rac
     global tag_inputs_soil_step, res_soil_step, tag_inputs_residue_updt, res_residue_step, tag_loop_inputs
@@ -631,7 +645,9 @@ def EndEach(lstring,lscene):
         invar['DemCp'], invar['DemCp_lf'] , invar['DemCp_in'], invar['DemCp_pt'] = {},{},{},{}
     
     
-    
+    # tag pour recup MStot autres plantes en couplage externe
+    #MStot_extern = 0. # T.ha-1
+    #print('in MStot_extern', MStot_extern)
     
     tag_loop_inputs = [invar, outvar, invar_sc, ParamP, station, carto,  meteo_j, mng_j, DOY, cutNB, start_time, nbplantes, surfsolref, m_lais, dicFeuilBilanR, surf_refVOX,  triplets , ls_dif, S, par_SN, lims_sol, ls_roots, ls_mat_res, vCC, ls_ftswStress, ls_NNIStress, ls_TStress, lsApex, lsApexAll, dicOrgans, deltaI_I0, nbI_I0, I_I0profilLfPlant, I_I0profilPetPlant, I_I0profilInPlant, NlClasses, NaClasses, NlinClasses, opt_stressW, opt_stressN, opt_stressGel, opt_residu, dxyz]
     
@@ -670,7 +686,7 @@ def EndEach(lstring,lscene):
         # Step Potential plant growth
         ##########
         
-        invar, outvar, ls_demandeN_bis, temps = loop.daily_growth_loop(ParamP, invar, outvar, ls_epsi, meteo_j, mng_j, nbplantes, surfsolref, ls_ftswStress, ls_NNIStress, ls_TStress, lsApex, lsApexAll, opt_stressW, opt_stressN, opt_stressGel)
+        invar, outvar, ls_demandeN_bis, temps = loop.daily_growth_loop(ParamP, invar, outvar, ls_epsi, meteo_j, mng_j, nbplantes, surfsolref, ls_ftswStress, ls_NNIStress, ls_TStress, lsApex, lsApexAll, opt_stressW, opt_stressN, opt_stressGel, MStot_extern)
         
         
         ##########
@@ -876,6 +892,7 @@ def End(lstring,lscene):
     #Viewer.display(lscene)
     #Viewer.frameGL.saveImage(outimagepath)
     
+    #print(lstring)
     pass
 
 
@@ -1079,7 +1096,7 @@ GetPos(X0,Y0,Z0,nump2)A(nump,nsh,statut, age, duromb, rank, rgeq, phyllotax):
     dX, dY = X0-carto[nump][0],Y0-carto[nump][1]
     dist2 =  dX*dX+dY*dY
     if dist2 > invar['Dplante'][nump]**2:
-        invar['Dplante'][nump] = sqrt(dist2)
+        invar['Dplante'][nump] = np.sqrt(dist2)
     
     vox = riri.WhichVoxel(array([X0,Y0,Z0]), origin_grid, na, dxyz)
     PARup = meteo_j['I0'] if vox[2] == 1 else res_trans[vox[2]-1][vox[1]][vox[0]] / surf_refVOX
@@ -1318,7 +1335,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
     dX, dY = X0-carto[nump][0],Y0-carto[nump][1]
     dist2 =  dX*dX+dY*dY
     if dist2 > invar['Dplante'][nump]**2:
-        invar['Dplante'][nump] = sqrt(dist2)
+        invar['Dplante'][nump] = np.sqrt(dist2)
     
     #calul surface
     surF = sh.calc_surF(ParamP[nump], rank, rankp, ordre, l-Lcut, type=ParamP[nump]['type']) #m2
@@ -2109,7 +2126,7 @@ Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
         #choix du geom
         if int(ParamP[nump]['type'])==1 or int(ParamP[nump]['type'])==2 : #legume or non fixing-legume
             if opt_Trud == 1: #corrige leafshape effect pour feuille detaillee de legumineuse
-                cor_lF = sqrt(ParamP[nump]['leafshape'] / 0.5)
+                cor_lF = np.sqrt(ParamP[nump]['leafshape'] / 0.5)
                 Long = Long * (1/cor_lF)
                 Larg  = Larg * (1/cor_lF)
             

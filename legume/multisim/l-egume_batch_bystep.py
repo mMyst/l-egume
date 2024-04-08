@@ -679,6 +679,10 @@ def runl2systemLightSoil_bystep(n, m):
         tag_loop_inputs2 = lsys2.tag_loop_inputs
         invar2, outvar2, invar_sc2, ParamP2, station2, carto2, meteo_j2, mng_j2, DOY2, cutNB2, start_time2, nbplantes2, surfsolref2, m_lais2, dicFeuilBilanR2, surf_refVOX2, triplets2, ls_dif2, S2, par_SN2, lims_sol2, ls_roots2, ls_mat_res2, vCC2, ls_ftswStress2, ls_NNIStress2, ls_TStress2, lsApex2, lsApexAll2, dicOrgans2, deltaI_I02, nbI_I02, I_I0profilLfPlant2, I_I0profilPetPlant2, I_I0profilInPlant2, NlClasses2, NaClasses2, NlinClasses2, opt_stressW2, opt_stressN2, opt_stressGel2, opt_residu2, dxyz2 = tag_loop_inputs2
 
+        MStot_extern1 = lsys1.MStot_extern #np.sum(np.array(invar2['MS_aerien'])) / (surfsolref1 * 100.)  # T.ha-1#
+        MStot_extern2 = lsys2.MStot_extern #np.sum(np.array(invar1['MS_aerien'])) / (surfsolref1 * 100.)  # T.ha-1#
+        print('MStot_extern', MStot_extern1, MStot_extern2)
+
         #def variables communes
         meteo_j, station, surf_refVOX, triplets, surfsolref, dxyz = meteo_j1, station1, surf_refVOX1, triplets1, surfsolref1, dxyz1
 
@@ -735,8 +739,8 @@ def runl2systemLightSoil_bystep(n, m):
         # Step Potential plant growth
         ##########
 
-        invar1, outvar1, ls_demandeN_bis1, temps1 = loop.daily_growth_loop(ParamP1, invar1, outvar1, ls_epsi1, meteo_j1, mng_j1, nbplantes1, surfsolref1, ls_ftswStress1, ls_NNIStress1, ls_TStress1, lsApex1, lsApexAll1, opt_stressW1, opt_stressN1, opt_stressGel1)
-        invar2, outvar2, ls_demandeN_bis2, temps2 = loop.daily_growth_loop(ParamP2, invar2, outvar2, ls_epsi2, meteo_j2, mng_j2, nbplantes2, surfsolref2, ls_ftswStress2, ls_NNIStress2, ls_TStress2, lsApex2, lsApexAll2, opt_stressW2, opt_stressN2, opt_stressGel2)
+        invar1, outvar1, ls_demandeN_bis1, temps1 = loop.daily_growth_loop(ParamP1, invar1, outvar1, ls_epsi1, meteo_j1, mng_j1, nbplantes1, surfsolref1, ls_ftswStress1, ls_NNIStress1, ls_TStress1, lsApex1, lsApexAll1, opt_stressW1, opt_stressN1, opt_stressGel1, MStot_extern1)
+        invar2, outvar2, ls_demandeN_bis2, temps2 = loop.daily_growth_loop(ParamP2, invar2, outvar2, ls_epsi2, meteo_j2, mng_j2, nbplantes2, surfsolref2, ls_ftswStress2, ls_NNIStress2, ls_TStress2, lsApex2, lsApexAll2, opt_stressW2, opt_stressN2, opt_stressGel2, MStot_extern2)
 
         ##########
         # step soil
@@ -812,8 +816,24 @@ def runl2systemLightSoil_bystep(n, m):
                               I_I0profilInPlant2, NlClasses2, NaClasses2, NlinClasses2, outvar2]
 
 
+
         invar1, invar_sc1, outvar1, I_I0profilInPlant1, ls_ftswStress1, ls_NNIStress1, ls_TStress1 = loop.Update_stress_loop(*tag_inputs_stress1)
         invar2, invar_sc2, outvar2, I_I0profilInPlant2, ls_ftswStress2, ls_NNIStress2, ls_TStress2 = loop.Update_stress_loop(*tag_inputs_stress2)
+
+        DOY = DOY1 + 1 #189
+        mng_j_plus1 = IOxls.extract_dataframe(lsys1.mng, ['Coupe', 'Irrig', 'FertNO3', 'FertNH4', 'Hcut'], 'DOY', val=DOY)
+        willTTcut = int(mng_j_plus1["Coupe"][0])
+        isTTcut = int(mng_j["Coupe"])
+        if willTTcut == 1: #isTTcut == 1 or
+            MSaer_extern1 = 0. #np.sum(np.array(invar1['MS_aerien'])) / (surfsolref * 100.)  #T.ha-1
+            MSaer_extern2 = 0. #np.sum(np.array(invar2['MS_aerien'])) / (surfsolref * 100.)  #T.ha-1
+            #pb -> 1 step trop tard par rapport a couplage interne! -> mng_j+1??
+        else:
+            MSaer_extern1 = np.sum(np.array(invar1['MS_aerien'])) / (surfsolref * 100.)  # T.ha-1
+            MSaer_extern2 = np.sum(np.array(invar2['MS_aerien'])) / (surfsolref * 100.)  # T.ha-1
+
+        print('MSaer_extern', MSaer_extern1, MSaer_extern2, isTTcut)
+
 
         print('ftsw', np.mean(ls_ftsw), np.mean(ls_ftsw1), np.mean(ls_ftsw2))
         print('water stress Dev', np.mean(ls_ftswStress1['WaterTreshDevI']), np.mean(ls_ftswStress2['WaterTreshDevI']))
@@ -882,6 +902,8 @@ def runl2systemLightSoil_bystep(n, m):
         lsys1.ls_TStress = ls_TStress1
         lsys1.I_I0profilInPlant = I_I0profilInPlant1
 
+        lsys1.MStot_extern = MSaer_extern2
+
         # lsystem 2
         lsys2.invar = invar2
         lsys2.outvar = outvar2
@@ -899,6 +921,8 @@ def runl2systemLightSoil_bystep(n, m):
         lsys2.ls_NNIStress = ls_NNIStress2
         lsys2.ls_TStress = ls_TStress2
         lsys2.I_I0profilInPlant = I_I0profilInPlant2
+
+        lsys2.MStot_extern = MSaer_extern1
 
     testsim[names[n]].clear()
     print((''.join((names[n], " - done"))))
