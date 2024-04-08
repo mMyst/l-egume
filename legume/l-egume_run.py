@@ -1,4 +1,4 @@
-#single un pour L-egume permettant le lancement en ligne de commande avec options 15/08/18
+ #single un pour L-egume permettant le lancement en ligne de commande avec options 15/08/18
 #lecture des entrees dans dossier input / ecrture des sorties dans les fichiers par defaut du output
 
 

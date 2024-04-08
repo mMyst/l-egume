@@ -188,6 +188,7 @@ def lsystemInputOutput_usm(fxls_usm, foldin = 'input', ongletBatch = 'exemple', 
     testsim[name].visu_leaf = int(dic_opt['visu_leaf'])  # 1# pour visualisation/interpretation feuilles slmt
     testsim[name].visu_sol = int(dic_opt['visu_sol'])  # 1# pour visualisation/interpretation sol
     testsim[name].visu_solsurf = int(dic_opt['visu_solsurf'])  # 0 pour visualisation du pattern
+    testsim[name].opt_Trud = int(dic_opt['opt_Trud'])  # 0 pour primitive de feuilles simple, #1 pour détaillée 
     testsim[name].frDisplay = int(dic_opt['frDisplay'])  # 1 #sauvegarde de la derniere vue
     testsim[name].movDisplay = int(dic_opt['movDisplay'])  # #sauvegarde toutes les vues pour faire un film
     testsim[name].opt_zip = int(dic_opt['opt_zip'])  # if 1, zip and delete the output csv files
