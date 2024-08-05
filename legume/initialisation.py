@@ -39,7 +39,7 @@ def init_glob_variables_simVGL(meteo, mng, DOYdeb, path_station, ongletSta):
 
     ## meteo du jour
     DOY = DOYdeb
-    meteo_j = IOxls.extract_dataframe(meteo, ['TmoyDay', 'RG', 'Et0', 'Precip', 'Tmin', 'Tmax', 'Tsol'], 'DOY', val=DOY)
+    meteo_j = IOxls.extract_dataframe(meteo, ['DOY','TmoyDay', 'RG', 'Et0', 'Precip', 'Tmin', 'Tmax', 'Tsol'], 'DOY', val=DOY)
     meteo_j['I0'] = [0.48 * meteo_j['RG'][0] * 10000 / (3600 * 24)]  # flux PAR journalier moyen en W.m-2 / RG en j.cm-2
     mng_j = IOxls.extract_dataframe(mng, ['Coupe', 'Irrig', 'FertNO3', 'FertNH4', 'Hcut'], 'DOY', val=DOY)
     for k in list(meteo_j.keys()): meteo_j[k] = meteo_j[k][0]
@@ -150,7 +150,7 @@ def init_scene_fromLpy(ParamP, inis, cote, nbcote, station, lsidP,  type='damier
     # 1) CARTO
     distplantes = cote / nbcote  # 1. #cm
     carto = sh.planter_coordinates(type, cote, nbcote, orientRow='X', forceCarto=forceCarto)
-    print("ici carto", carto)
+    #print("ici carto", carto)
 
     # reduit a une espece si veut simul separee
     if type == 'damier8_sp1' or type == 'damier8_sp2' or type == 'damier16_sp1' or type == 'damier16_sp2' or 'row4_sp1' or 'row4_sp2':
