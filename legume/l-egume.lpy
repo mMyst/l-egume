@@ -97,7 +97,7 @@ TreshChangeRoot = 0.5 #cm # minimum to update ls_roots
 noiseGeom = [0.001, 0.001, 0.001] #[15., 20., 20.] #[35., 30., 30.] #[phyllotaxy, IncPet, gammaFeuil] #en degre -> pour bruit sur geometrie
 forceCarto = None #[np.array([1.,2.,0.]), np.array([11.,2.,0.]), np.array([7.,7.,0.])] # ! doit etre des float
 forceOrder =  None #[0,1,1] #
-WidthCut = 5. #1000.#cm # pour coupe localisee rang / a reporter en lecture fichier management
+WidthCut = 1000.#5. #cm # pour coupe localisee rang / a reporter en lecture fichier management
 
 
 ## lecture fichier meteo
@@ -917,8 +917,8 @@ module RLB(nump, nsh, age, rankp, Horiz) #Root Lateral Bud
 module RLAP(nump, nsh,age,rankp,l, Horiz, largVol, longVol,cumdl) #Root Lateral Apex Prospection (max diameter reached by secondary roots)
 module Coll(posi) #Collar 
 
-module sol(S, nbcol) #objet sol entier (nbcol en y)
-module solxy(S, idcol) #colone de sol pour visu 2D
+module sol(nbcol) #objet sol entier (nbcol en y)
+module solxy(idcol) #colone de sol pour visu 2D
 module attente(n) #pour attendre initialisation des variables avant de representer le sol
 module pattern(pos) #pour sol surface
 
@@ -2009,9 +2009,9 @@ GetPos(X0,Y0,Z0,nump2)RLAP(nump,nsh,age,rankp,l, Horiz,largVol, longVol, cumdl):
 [Pet(nump, nsh, age, azi, l, statut)] --> * #pour nettoyer les restes de coupe qui on enelver feuille -> ajouter a residus!
 
 
-sol(sol_obj, nbcol):
+sol(nbcol):
     if nbcol>0:
-        nproduce [solxy(sol_obj, nbcol-1)]sol(sol_obj, nbcol-1)
+        nproduce [solxy(nbcol-1)]sol(nbcol-1)
     else:
         produce *
 
@@ -2020,7 +2020,7 @@ attente(n):
     if n>0:
         produce attente(n-1)
     else:
-        produce pattern(0)sol(S, discret_solXY[1])
+        produce pattern(0)sol(discret_solXY[1])
 
 
 interpretation:
@@ -2198,7 +2198,9 @@ RLAP(nump,nsh,age,rankp, l, Horiz, largVol, longVol, cumdl):
     else:
         produce ;(0)_(largVol)f(longVol)
 
-solxy(sol_obj, idcol):
+solxy(idcol):
+    global S
+    sol_obj = S
     if visu_sol == 1:
         global dz_sol, ncouches_sol, discret_solXY
         #print np.mean(sol_obj.HRp(), axis=1)[:,0]#np.mean(np.mean(sol_obj.HRp(), axis=0), axis=0)
@@ -2217,13 +2219,15 @@ solxy(sol_obj, idcol):
             
             #ftsw = max(0., np.mean(sol_obj.ftsw_t[i,:,:]))
             ftsw = max(0, values[i])
-            col = 16 + int(ceil((1-ftsw)/0.1))
+            col = 16 + int(np.ceil((1-ftsw)/0.1))
             #nproduce ;(col)@M(-50,0,z-dz_sol)@g(Box(1,30,dz_sol))
             nproduce ;(col)@M(-50,float(idcol)*2*larg_box/float(nbcol),z-dz_sol)@g(Box(1,larg_box/float(nbcol),dz_sol))
 
 
 
-sol(sol_obj, nbcol):
+sol(nbcol):
+    global S
+    sol_obj = S
     if visu_sol == 1:
         #l'affiche au premier step pour bien definir champs de la camera
         global dz_sol, ncouches_sol
@@ -2232,7 +2236,7 @@ sol(sol_obj, nbcol):
             z = -i*dz_sol
             ftsw = max(0., np.mean(sol_obj.ftsw_t[i,:,:]))
             #ftsw = max(0, ftsw_xy[i])
-            col = 16 + int(ceil((1-ftsw)/0.1))
+            col = 16 + int(np.ceil((1-ftsw)/0.1))
             nproduce ;(col)@M(-53,0,z-dz_sol)@g(Box(1,30,dz_sol))
             #nproduce ;(col)@M(-50,float(idcol)*30./float(nbcol),z-dz_sol)@g(Box(1,30./float(nbcol),dz_sol))
 
