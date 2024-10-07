@@ -8,6 +8,7 @@ import RootMorpho as rt
 from copy import deepcopy
 import numpy as np
 import os
+import pickle
 
 try:
     from soil3ds import soil_moduleN as solN #import de la version develop si module soil3ds est installe
@@ -638,7 +639,7 @@ def sol_dicout_endsim(S, outvar, DOYdeb, DOYend, opt_residu=0):
     return dicout
 
 
-def write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfvar):
+def write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfvar, l_string='', tag_loop=None):
     """ write output csv files - call in End() """
 
     outvarfile, outBilanNfile, outHRfile, resrootfile, lsorgfile, outMngfile, outsdfile = ls_outf_names
@@ -698,6 +699,20 @@ def write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfva
     if outf['outsdfile'] != 0.:  # valeur de parametres par plante
         IOtable.write_dict(res_sd, path_out, outsdfile)
         ls_fileOUT.append(os.path.join(path_out, outsdfile))
+
+    #ecriture lstring et tag_loop_inputs
+    if outf['outPickle'] != 0.:
+        path_lstring = os.path.join(path_out, 'my_lstring.txt')
+        f = open(path_lstring, 'w')
+        f.write(str(l_string))
+        f.close()
+
+        path_tagloop = os.path.join(path_out, 'tagloop.pkl')
+        with open(path_tagloop, 'wb') as f:
+            pickle.dump(tag_loop, f) #liste d'objets tag_loop_inputs
+
+        ls_fileOUT.append(path_lstring)
+        ls_fileOUT.append(path_tagloop)
 
     return ls_fileOUT
 

@@ -75,7 +75,7 @@ opt_external_coupling = 0 # 1 for environmental coupling out of lpy; 0 for inter
 
 #initialisation des variables globale de simulation
 DOYdeb = 60#100#49#159#124#
-DOYend = 135#192#160#335#180#202#231#335#610#120#250#244#282#
+DOYend = 135#192#160#335#180#202#335#610#120#250#244#282#
 Rseed = 0#2#0 #random seed
 deltalevmoy = 30 #degre.jours
 deltalevsd = 15
@@ -84,7 +84,7 @@ deltalevsd = 15
 cote = 40#40#240.#7.#80.#100.#100#25.#25.#cm
 nbcote = 8#20#4#16#8#10#9#1#2#
 optdamier = 4#2#21#
-typearrangement='damier8'#'row4_sp2'#'row4_sp1'#'row4'#'damier8'#'homogeneous'#'row4_Nsp'#'row_Nsp'#'random10'#'random9'#'random8_4'#'damier9'#'damier8_4'#'damier10'#'random8'#'damier8_sp2'#'damier16'#'random16'
+typearrangement='damier8'#'homogeneous'#'row4_sp2'#'row4_sp1'#'row4'#'damier8'#'row4_Nsp'#'row_Nsp'#'random10'#'random9'#'random8_4'#'damier9'#'damier8_4'#'damier10'#'random8'#'damier8_sp2'#'damier16'#'random16'
 ls_idscenar = [1, 1]#[1, 1, 1] #
 ls_idscenar_sd = [1, 1]#[8, 8]#[7, 7]#[6, 6]#[1, 1, 1] #
 
@@ -852,7 +852,7 @@ def EndEach(lstring,lscene):
 
 
 def End(lstring,lscene):
-    global res_root, outvarpath,outimagepath, savelsOrgans, lsOrgans, res_sd
+    global res_root, outvarpath,outimagepath, savelsOrgans, lsOrgans, res_sd, tag_loop_inputs
     
     #fermeture des bilans sol -> dicout
     dicout = loop.sol_dicout_endsim(S, outvar, DOYdeb, DOYend, opt_residu)
@@ -866,7 +866,7 @@ def End(lstring,lscene):
     ls_keyvar_pot = ['colnames','pattern','TT','time','cutNB','SurfPlante', 'PARaPlante', 'PARiPlante', 'epsi', 'dMSaer', 'Hplante', 'Dplante','RLTot','RDepth','MS_aerien','MS_feuil','MS_tot','countSh','countShExp','demandC','Leaf_Stem','NBsh','NBI','NBD1','NBB','FTSW','Etransp','DemandN_Feuil','DemandN_Pet', 'DemandN_Stem','DemandN_Tot', 'DemandN_Tot_Aer', 'Npc', 'Npc_aer', 'NNI','Ndfa', 'Qfix','Naerien','Nuptake_sol','R_DemandC_Root', 'SRL','dMSenFeuil','dMSenTige', 'MS_pivot', 'MS_rac_fine','R_DemandC_Shoot','RUEpot','RUE','Npc_piv','Npc_rac_fine','dRLenSentot','dMSenRoot','RLTotNet','MS_rac_fineNet','perteN_rac_fine','NBphyto','NBapexAct','transpi','cumtranspi','aliveB','dMSmortGel','dNmortGel','TTphyllo','DemCp','dTT','Udev','Udevstress','TTudev','MS_aerienNonRec', 'MS_aerienRec', 'NaerienNonRec','NaerienRec','Ncoty','MS_tige','graineC','graineN','CreservPiv','NreservPiv','dMSenPiv','dMSenNonRec', 'perteN_NonRec', 'perteN_Piv', 'perteN_aerien', 'Npc_aerNonRec','MS_senaerien','dMSmortPlant_aer','dMSmortPlant_pivot','dMSmortPlant_racfine','dNmortPlant_aer','dNmortPlant_pivot','dNmortPlant_racfine','alivePiv','alive','ChangeRoot','RLentotfromRootMass','RLentotfromDev','ConcNmoy']
     
     # ecriture + liste des fichiers ecrits en sortie et affichee en fin de simul
-    ls_fileOUT = loop.write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfvar)
+    ls_fileOUT = loop.write_vgl_outf(outf, path_out, ls_outf_names, ls_objw, ls_keyvar_pot, outfvar, lstring, tag_loop_inputs)
     
     
     #zippe les sorties si option opt_zip
@@ -891,6 +891,9 @@ def End(lstring,lscene):
         Viewer.frameGL.saveImage(outimagepath)
         Viewer.stop()
     
+    
+    
+    
     #frameDisplay(True)
     #Viewer.display(lscene)
     #Viewer.frameGL.saveImage(outimagepath)
@@ -902,12 +905,12 @@ def End(lstring,lscene):
 module Sd(nump) # Seed
 module A(nump, nsh, statut, age, duromb, rank, rgeq, phyllotax) #primary shoot Apex (rgeq: ajoute pour grass tenir compte effet tallage/coupe)
 module A2(nump, nsh, statut, age, duromb, rank, rankp, phyllotax) #secondary shoot Apex (rankp= rang sur porteur)
-module D(nump, nsh, statut, age, posi, parent) #Dormant bud of the crown
+module D(nump, nsh, statut, age, posi1, posi2, posi3, parent) #Dormant bud of the crown
 module D2(nump, nsh, age, rankp, phyllotax,shoottype) #dormant bud at the leaf axil
-module B(nump, nsh, age, posi, nrhiz, azi, par, statut) #active Bud of the crown nsh=numero de tige; rhiz  nb noeud de rhizome
-module SHP(nump, nsh, azi, elv0, posi, nbp,par) #SHoot Parameters: nbp et par pour moduler incli_ini en fonction de longueur et lumiere
+module B(nump, nsh, age, posi1, posi2, posi3, nrhiz, azi, par, statut) #active Bud of the crown nsh=numero de tige; rhiz  nb noeud de rhizome
+module SHP(nump, nsh, azi, elv0, nbp,par) #SHoot Parameters: nbp et par pour moduler incli_ini en fonction de longueur et lumiere
 module In(nump, nsh, age, rank, rankp, l, statut, ordre) #Internode (l longueur normalisee)
-module Lf(nump, nsh, age, azi, rank, rankp, l, tt_omb,Lcut, statut, ordre, noise) #Leaf (l longueur normalisee)
+module Lf(nump, nsh, age, azi, rank, rankp, l, tt_omb,Lcut, statut, ordre, noise1, noise2) #Leaf (l longueur normalisee)
 module Pet(nump, nsh, age, azi, l, statut) #Petiole
 module Stp(nump, azi, l, statut)#Stipule
 module RA(nump, nsh, age, rankp, agecum, moduloH) #primary Root Apex
@@ -915,7 +918,7 @@ module RB(nump, nsh, age, rankp, statut) #adventive root bud
 module RS(nump, nsh, rankp, moduloH) #Root Segment
 module RLB(nump, nsh, age, rankp, Horiz) #Root Lateral Bud
 module RLAP(nump, nsh,age,rankp,l, Horiz, largVol, longVol,cumdl) #Root Lateral Apex Prospection (max diameter reached by secondary roots)
-module Coll(posi) #Collar 
+module Coll(posi1, posi2, posi3) #Collar 
 
 module sol(nbcol) #objet sol entier (nbcol en y)
 module solxy(idcol) #colone de sol pour visu 2D
@@ -940,9 +943,9 @@ production:
 
 
 Sd(nump) :
-    produce: Coll(carto[nump])RA(nump,0,-1,0,0,0)][SetHead()/(ls_seeds[nump].randgen.uniform(0.,360.))&(90)B(nump,0,ParamP[nump]['phyllochron'],carto[nump],0,ls_seeds[nump].randgen.uniform(0.,360.),0,'exp')] #ouverture de [ racine dans le Coll
+    produce: Coll(carto[nump][0], carto[nump][1], carto[nump][2])RA(nump,0,-1,0,0,0)][SetHead()/(ls_seeds[nump].randgen.uniform(0.,360.))&(90)B(nump,0,ParamP[nump]['phyllochron'],carto[nump][0], carto[nump][1], carto[nump][2], 0, ls_seeds[nump].randgen.uniform(0.,360.),0,'exp')] #ouverture de [ racine dans le Coll
 
-B(nump, nsh, age, posi, nrhiz, azi, par, statut):
+B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
     global ls_ftswStress
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     
@@ -1043,7 +1046,7 @@ B(nump, nsh, age, posi, nrhiz, azi, par, statut):
             
             rgeq = invar['rgeq'][nump]#0
             #print nsh, 'rgeq', rgeq, invar['rgeq'][nump]
-            produce [@M(posi[0],posi[1],posi[2])SetHead()/(azi)&(90)B(nump,newnsh,newageB,posini,new_nrhiz,newazi,0,'exp')][D(nump,newnsh2,0,newageB,posini,nsh)]SHP(nump,nsh, azi,elv0,posi,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,0,rgeq,azi)
+            produce [@M(posi1,posi2,posi3)SetHead()/(azi)&(90)B(nump,newnsh,newageB,posini[0],posini[1],posini[2],new_nrhiz,newazi,0,'exp')][D(nump,newnsh2,0,newageB,posini[0],posini[1],posini[2],nsh)]SHP(nump,nsh, azi,elv0,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,0,rgeq,azi)
         
         elif statut=='exp' and invar['countShExp'][nump]< ParamP[nump]['nshoots']-1 and (stressW < limStressTalW or stressN < limStressTalN):
             # nouvelle tige qui demarre pas a cause de stress -> mort bourgeon
@@ -1061,13 +1064,13 @@ B(nump, nsh, age, posi, nrhiz, azi, par, statut):
             #print('B',nsh, newpar/meteo_j['I0'])
             
             rgeq = invar['rgeq'][nump]#0
-            produce [D(nump,newnsh,0,newageB,posini,nsh)]SHP(nump,nsh, azi,elv0,posi,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,deltaBud, rgeq,azi)
+            produce [D(nump,newnsh,0,newageB,posini[0],posini[1],posini[2],nsh)]SHP(nump,nsh, azi,elv0,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,deltaBud, rgeq,azi)
     elif age >= phylloPot/(0.00001+ls_ftswStress['WaterTreshDevI'][nump]*ls_NNIStress['NTreshDevII'][nump]) and nrhiz>=1:
         newageB = age%phylloPot
-        produce F(ParamP[nump]['LenRhiz'])B(nump,nsh,newageB, posi,  nrhiz-1, azi, newpar, statut)
+        produce F(ParamP[nump]['LenRhiz'])B(nump,nsh,newageB, posi1, posi2, posi3,  nrhiz-1, azi, newpar, statut)
     else:
         newageB = age+STEPS
-        produce B(nump,nsh,newageB, posi, nrhiz, azi, newpar, statut)
+        produce B(nump,nsh,newageB, posi1, posi2, posi3, nrhiz, azi, newpar, statut)
 
 
 
@@ -1193,10 +1196,9 @@ GetPos(X0,Y0,Z0,nump2)A(nump,nsh,statut, age, duromb, rank, rgeq, phyllotax):
             dev_phyllot = ls_seeds[nump].randgen.uniform(-noiseGeom[0],noiseGeom[0]) #deviation phyllotaxy 
             dev_pet = ls_seeds[nump].randgen.uniform(-noiseGeom[1],noiseGeom[1]) #deviation incPet
             dev_inc = ls_seeds[nump].randgen.uniform(-noiseGeom[2],noiseGeom[2]) #deviation incPet
-            devlf = [dev_pet, dev_inc]
             
             #print('prodLf', nump,nsh,rank,newagef,STEPS)
-            produce GetPos(X0,Y0,Z0,nump)In(nump,nsh,newage,rank,0,liniE,'exp',1)[GetPos(X0,Y0,Z0,nump)RB(nump, nsh,0,rank,0)][D2(nump,nsh,newage,rank,phyllotax,shoottype)][Stp(nump, phyllotax, liniS, 'exp')Pet(nump,nsh,newage, phyllotax,liniP,'exp')GetPos(X0,Y0,Z0,nump)GetUp(0,0,0)Lf(nump,nsh,newagef, phyllotax,rank,rankp,liniF,0.,0.,'exp',1,devlf)]GetPos(X0,Y0,Z0,nump)A(nump,nsh,1,newage, 0, rank+1, rgeq,phyllotax+ParamP[nump]['phyllotaxy']+dev_phyllot)
+            produce GetPos(X0,Y0,Z0,nump)In(nump,nsh,newage,rank,0,liniE,'exp',1)[GetPos(X0,Y0,Z0,nump)RB(nump, nsh,0,rank,0)][D2(nump,nsh,newage,rank,phyllotax,shoottype)][Stp(nump, phyllotax, liniS, 'exp')Pet(nump,nsh,newage, phyllotax,liniP,'exp')GetPos(X0,Y0,Z0,nump)GetUp(0,0,0)Lf(nump,nsh,newagef, phyllotax,rank,rankp,liniF,0.,0.,'exp',1,dev_pet, dev_inc)]GetPos(X0,Y0,Z0,nump)A(nump,nsh,1,newage, 0, rank+1, rgeq,phyllotax+ParamP[nump]['phyllotaxy']+dev_phyllot)
         else:#ombre
             #mort legume: si tige est ombre, n'est plus bourgeon et n'a plus de feuille (test 1), sinon en arret
             if rank>3 :# and int(ParamP[nump]['type'])!=3:
@@ -1281,9 +1283,8 @@ GetPos(X0,Y0,Z0,nump2)A2(nump, nsh, statut, age, duromb, rank, rankp, phyllotax)
             dev_phyllot = ls_seeds[nump].randgen.uniform(-noiseGeom[0],noiseGeom[0]) #deviation phyllotaxy
             dev_pet = ls_seeds[nump].randgen.uniform(-noiseGeom[1],noiseGeom[1]) #deviation incPet
             dev_inc = ls_seeds[nump].randgen.uniform(-noiseGeom[2],noiseGeom[2]) #deviation incPet
-            devlf = [dev_pet, dev_inc]
             
-            produce GetPos(X0,Y0,Z0,nump)In(nump,nsh,newage,rank,rankp,liniE,'exp',2)GetPos(X0,Y0,Z0,nump)[Stp(nump, phyllotax, liniS, 'exp')Pet(nump,nsh,newage, phyllotax,liniP,'exp')GetPos(X0,Y0,Z0,nump)GetUp(0,0,0)Lf(nump,nsh,newage, phyllotax,rank,rankp,liniF,0.,0.,'exp',2,devlf)]GetPos(X0,Y0,Z0,nump)A2(nump, nsh, 1,newage, 0, rank+1, rankp, phyllotax+ParamP[nump]['phyllotaxy']+dev_phyllot)
+            produce GetPos(X0,Y0,Z0,nump)In(nump,nsh,newage,rank,rankp,liniE,'exp',2)GetPos(X0,Y0,Z0,nump)[Stp(nump, phyllotax, liniS, 'exp')Pet(nump,nsh,newage, phyllotax,liniP,'exp')GetPos(X0,Y0,Z0,nump)GetUp(0,0,0)Lf(nump,nsh,newage, phyllotax,rank,rankp,liniF,0.,0.,'exp',2,dev_pet, dev_inc)]GetPos(X0,Y0,Z0,nump)A2(nump, nsh, 1,newage, 0, rank+1, rankp, phyllotax+ParamP[nump]['phyllotaxy']+dev_phyllot)
         else:
             if duromb<ParamP[nump]['MaxSurvOmbr']:
                 lsApexStop.append([nump,nsh,rank,2, I_I0, duromb+STEPS,rankp])
@@ -1308,13 +1309,13 @@ GetPos(X0,Y0,Z0,nump2)A2(nump, nsh, statut, age, duromb, rank, rankp, phyllotax)
 
 
 
-SHP(nump,nsh, azi,elv0,posi,nbp,par):
+SHP(nump,nsh, azi,elv0,nbp,par):
      if nsh in invar['lsApexMort'][nump]:
         produce * #pour nettoyer lstring si tige morte
      else:
         vox = riri.WhichVoxel(carto[nump], origin_grid, na, dxyz)
         newpar = res_trans[-1][vox[1]][vox[0]]/surf_refVOX
-        produce SHP(nump,nsh, azi,elv0,posi, nbp+1, newpar)
+        produce SHP(nump,nsh, azi,elv0, nbp+1, newpar)
 #??erreur nbp (nb phytomere devrait dependre meme regle que phyllochrone! (bon seulement pour cet exemple)
 
 GetPos(X0,Y0,Z0,nump): #Rq: le GetPos doit etre dans les regle de production (pas interpretation pour que coupe soit effective)
@@ -1341,7 +1342,7 @@ GetPos(X0,Y0,Z0,nump): #Rq: le GetPos doit etre dans les regle de production (pa
 
 
 
-GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcut,statut,ordre,noise) :
+GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcut,statut,ordre,noise1, noise2) :
     global  SurfprofilPlant, ls_ftswStress, lsOrgans, I_I0profilLfPlant, ls_pointes1 #SurfPlante, PARaPlante, PARiPlante, Hplante, Dplante,
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     
@@ -1515,7 +1516,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
                 m_laiPlt[nump][vox[2]][vox[1]][vox[0]] += surF
                 lsFeuilBilanR.append([nump, nsh,rank,rankp, 'sen', surF,ParamP[nump]['id_grid'],X0,Y0,Z0,vox[2],vox[1],vox[0],0,0])
             
-            produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb,Lcutnew,'sen',ordre,noise)
+            produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb,Lcutnew,'sen',ordre,noise1, noise2)
         elif tt_omb> ParamP[nump]['ombF_Ttresh']:
             #print "ombre!"
             if nf > 3 or surF >= tresh_LA:#15cm2#  #feuilles multifoliee 
@@ -1530,7 +1531,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
                 m_laiPlt[nump][vox[2]][vox[1]][vox[0]] += surF
                 lsFeuilBilanR.append([nump, nsh,rank,rankp,'sen', surF,ParamP[nump]['id_grid'],X0,Y0,Z0,vox[2],vox[1],vox[0],0,0])
             
-            produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb+STEPS,Lcutnew,'sen',ordre,noise)
+            produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb+STEPS,Lcutnew,'sen',ordre,noise1, noise2)
         else:
             adTTomb = STEPS if PARif <= ParamP[nump]['ombF_Ltresh'] else 0
             
@@ -1555,7 +1556,7 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
                     lsFeuilBilanR.append([nump, nsh,rank,rankp,'exp', newsurF,ParamP[nump]['id_grid'],X0,Y0,Z0,vox[2],vox[1],vox[0],0,0])
                 
                 stat = 'mat'if pot<0.005 and age>ParamP[nump]['delaiF'] else 'exp'
-                produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l+dl,tt_omb+adTTomb,Lcutnew,stat,ordre,noise)
+                produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l+dl,tt_omb+adTTomb,Lcutnew,stat,ordre,noise1, noise2)
             elif statut == 'mat':
                 if nf > 3 or surF >= tresh_LA:#15cm2#  #feuilles multifoliee 
                     surf_elementaire = surF / float(len(ls_pts[0]))
@@ -1569,10 +1570,10 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
                     m_laiPlt[nump][vox[2]][vox[1]][vox[0]] += surF
                     lsFeuilBilanR.append([nump, nsh,rank,rankp,'mat', surF,ParamP[nump]['id_grid'],X0,Y0,Z0,vox[2],vox[1],vox[0],0,0])
                 
-                produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb+adTTomb,Lcutnew,statut,ordre,noise)
+                produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb+adTTomb,Lcutnew,statut,ordre,noise1, noise2)
 
 
-Stp(nump,azi,l, statut) > Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise):
+Stp(nump,azi,l, statut) > Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise1, noise2):
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     
     stressW = ls_ftswStress['WaterTreshExpSurf'][nump]
@@ -1630,7 +1631,7 @@ Stp(nump,azi,l, statut) > Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0,Y0,Z0
         produce *
 
 
-Pet(nump,nsh,age, phyllotax, l, statut) > GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise):
+Pet(nump,nsh,age, phyllotax, l, statut) > GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise1, noise2):
     global ls_ftswStress
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     
@@ -1752,7 +1753,7 @@ GetPos(X0,Y0,Z0,nump2)In(nump,nsh,age,rank,rankp, l, statut,ordre):
         produce GetPos(X0,Y0,Z0,nump)In(nump,nsh,age+STEPS,rank,rankp, l, statut,ordre)
 
 
-D(nump,nsh, statut,age,posi,parent):
+D(nump,nsh, statut,age,posi1, posi2, posi3, parent):
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     invar['NBD1'][nump]+=1
     nbExp_Prev = outvar['NBBexp'][-1][0][nump+2]+1 #nb bourgeons type exp juste avant
@@ -1772,9 +1773,9 @@ D(nump,nsh, statut,age,posi,parent):
         
         #print 'D', nsh, parent, NIparent, deltaBud, newage
         
-        produce @M(posi[0],posi[1],posi[2])SetHead()/(newazi)&(90)B(nump, nsh, newage, posi, new_nrhiz,newazi, 0,'regular') #un bourgeon ave un nsh qui ne rajoute pas de nvelle tige
+        produce @M(posi1,posi2,posi3)SetHead()/(newazi)&(90)B(nump, nsh, newage, posi1, posi2, posi3, new_nrhiz,newazi, 0,'regular') #un bourgeon ave un nsh qui ne rajoute pas de nvelle tige
     else:
-        produce D(nump,nsh, statut,age+STEPS,posi,parent)
+        produce D(nump,nsh, statut,age+STEPS,posi1, posi2, posi3,parent)
 
 
 D2(nump, nsh, age, rankp, phyllotax,shoottype):
@@ -2024,7 +2025,7 @@ attente(n):
 
 
 interpretation:
-SHP(nump,nsh,azi, elv0,posi,nbp,par):
+SHP(nump,nsh,azi, elv0,nbp,par):
     if elv0 < ParamP[nump]['elvtresh'] and par>=meteo_j['I0']*ParamP[nump]['par_tresh']:#pour moduler incli0 par longueur/incli en plante isolee
         Lsh = ParamP[nump]['Len']*nbp
         Hsh = Lsh*np.sin(elv0*np.pi/180.)
@@ -2073,7 +2074,7 @@ A2(nump, nsh, statut, age, duromb,rank, rankp, phyllotax):
 #D(nump,statut,posi) --> @M(posi[0],posi[1],posi[2])#;(1)Sphere(0.2)#les voit pas
 
 
-Pet(nump, nsh, age, azi,l1, statut1) > GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise):
+Pet(nump, nsh, age, azi,l1, statut1) > GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise1, noise2):
     lpet = sh.calc_Lpet(ParamP[nump], rank, rankp, ordre, l1, type=ParamP[nump]['type'])*100.#cm
     IncPet = ParamP[nump]['IncPet']
     if visu_shoot==1:
@@ -2083,7 +2084,7 @@ Pet(nump, nsh, age, azi,l1, statut1) > GetPos(X0,Y0,Z0,nump3)GetUp(V1,V2,V3)Lf(n
         produce SetHead(0,0,1, 1,0,0)/(azi%360)Up(IncPet)_(0.1)f(lpet,0.1)SetHead(0,0,1, 1,0,0)/(azi%360-90)
 
 
-Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
+Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise1, noise2):
     if visu_shoot==1 or visu_leaf==1:
         cor_ordre = ParamP[nump]['ratioII'] if ordre==2 else 1.
         if int(ParamP[nump]['type'])==1 or int(ParamP[nump]['type'])==2:#legumineuse
@@ -2145,7 +2146,7 @@ Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
                 Long = Long * (1/cor_lF)
                 Larg  = Larg * (1/cor_lF)
             
-            geom = o3d.leg_leaf_lucas(Long, Larg, gamma=ParamP[nump]['gammaFeuil']+noise[1], nfol=nf, anginit=ParamP[nump]['IncPet']+noise[0], opt_Trud=opt_Trud)
+            geom = o3d.leg_leaf_lucas(Long, Larg, gamma=ParamP[nump]['gammaFeuil']+noise2, nfol=nf, anginit=ParamP[nump]['IncPet']+noise1, opt_Trud=opt_Trud)
             #print o3d.leg_leaf_lucas(Long, Larg, gamma=ParamP[nump]['gammaFeuil'], nfol=nf, anginit=ParamP[nump]['IncPet'], geom=False)
             #geom = o3d.mesh_leaflet(Long, Larg,alpha=15, n=8)
             
@@ -2157,7 +2158,7 @@ Lf(nump, nsh, age, azi,rank, rankp, l, tt_omb, Lcut,statut,ordre,noise):
         produce ;(col)@g(geom)
 
 
-Stp(nump, azi,l, statut)> Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0_,Y0_,Z0_,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise):
+Stp(nump, azi,l, statut)> Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0_,Y0_,Z0_,nump3)GetUp(V1,V2,V3)Lf(nump2,nsh2,age2,azi2,rank,rankp,l2,tt_omb,Lcut,statut2,ordre,noise1, noise2):
     if visu_shoot==1 or visu_leaf==1: 
         if ParamP[nump]['gotStip']== 1.:
             cor_ordre = ParamP[nump]['ratioII'] if ordre==2 else 1.
@@ -2171,7 +2172,7 @@ Stp(nump, azi,l, statut)> Pet(nump1, nsh, age, azi1, l1, statut1)GetPos(X0_,Y0_,
             #y a des implicites pour les angles
 
 
-Coll(posi) --> @M(posi[0],posi[1],posi[2])[;(0)SetHead(0,0,-1, -1,0,0) #! contient ouverture de [ du systeme racinaire
+Coll(posi1, posi2, posi3) --> @M(posi1,posi2,posi3)[;(0)SetHead(0,0,-1, -1,0,0) #! contient ouverture de [ du systeme racinaire
 
 RA(nump,nsh,age, rankp,agecum,moduloH): 
     if visu_root==1:
