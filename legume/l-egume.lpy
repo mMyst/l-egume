@@ -269,6 +269,10 @@ def Start():
     #ongletPvois = 'nonFix2'#'nonFix0'#'alfalfa'#'geno_test'#'G3'#
     #optdamier = 4
     #typearrangement='damier8' 
+
+    # dico temporaire 
+    global dico_newpar
+    dico_newpar = {}
     
     print('lspe', ls_Spe)
     ParamP, nbplantes, ls_seeds, lsidP, test_retard = initial.init_ParamP_VGL(path_plante, ls_Spe, nbcote, deltalevmoy, deltalevsd, Plt_seed, seed_=Rseed ,type=typearrangement, opt=optdamier, opt_scenar=opt_scenar, ls_idscenar=ls_idscenar, mn_sc=mn_sc, opt_sd=opt_sd, opt_covar=opt_covar, path_variance_geno=path_variance_geno, path_variance_matrix=path_variance_matrix, ls_idscenar_sd=ls_idscenar_sd, opt_shuffle=opt_shuffle,forceOrder=forceOrder)
@@ -283,6 +287,10 @@ def Start():
             pointes, ls_ptsall , ls_cos, ls_sin = o3d.leg_grass_withoutgeom(1., 1., angfol=-5., nfol=ParamP[nump]['profilLeafI_nfol'][3], anginit=ParamP[nump]['gammaFeuil'])
             pointes1 = [array(pointes)]
         ls_pointes1.append(pointes1)
+
+        dico_newpar[nump]={}
+        dico_newpar[nump]['newpar']=[]
+        dico_newpar[nump]['seuil'] = []
     
     #print('ici', IOxls.get_lsparami(ParamP, 'name'))
     
@@ -852,7 +860,7 @@ def EndEach(lstring,lscene):
 
 
 def End(lstring,lscene):
-    global res_root, outvarpath,outimagepath, savelsOrgans, lsOrgans, res_sd, tag_loop_inputs
+    global res_root, outvarpath,outimagepath, savelsOrgans, lsOrgans, res_sd, tag_loop_inputs, dico_newpar
     
     #fermeture des bilans sol -> dicout
     dicout = loop.sol_dicout_endsim(S, outvar, DOYdeb, DOYend, opt_residu)
@@ -892,7 +900,10 @@ def End(lstring,lscene):
         Viewer.stop()
     
     
-    
+    #dico_newpar
+    dfs = {nump: pd.DataFrame(donnees) for nump, donnees in dico_newpar.items()}
+    df_final = pd.concat(dfs, names=['nump', 'pas_de_temps']).reset_index()
+    df_final.to_csv(os.path.join(path_out, 'newpar.csv'), index=False)
     
     #frameDisplay(True)
     #Viewer.display(lscene)
@@ -946,7 +957,7 @@ Sd(nump) :
     produce: Coll(carto[nump][0], carto[nump][1], carto[nump][2])RA(nump,0,-1,0,0,0)][SetHead()/(ls_seeds[nump].randgen.uniform(0.,360.))&(90)B(nump,0,ParamP[nump]['phyllochron'],carto[nump][0], carto[nump][1], carto[nump][2], 0, ls_seeds[nump].randgen.uniform(0.,360.),0,1)] #ouverture de [ racine dans le Coll
 
 B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
-    global ls_ftswStress
+    global ls_ftswStress, dico_newpar
     STEPS = invar['Udev'][nump]#invar['dTT'][nump]
     
     invar['NBB'][nump]+=1
@@ -956,8 +967,17 @@ B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
     
     vox = riri.WhichVoxel(carto[nump], origin_grid, na, dxyz)
     newpar = res_trans[-1][vox[1]][vox[0]]/surf_refVOX # A ameliorer :pris sur carto et position reelle des bourgeosn-> pb pour stolons?
+    #methode debug gaetan
+    #newpar = (1 - sum(outvar['epsi'][-1][2:])) * meteo_j['I0']
+    
     nbExp_Prev = outvar['NBBexp'][-1][0][nump+2]+1
     
+
+    seuil = meteo_j['I0']*ParamP[nump]['par_tresh_til']
+    dico_newpar[nump]['newpar'].append(newpar)
+    dico_newpar[nump]['seuil'].append(seuil)
+
+    #print('newpar',newpar, seuil)
     
     # phyllo pot change selon rgeq pour les graminees
     if int(ParamP[nump]['type'])==3 : #graminee
@@ -981,7 +1001,7 @@ B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
         else: #bourgeons 'regular'
             deldeb = 0.
     
-    #print 'B', nsh, age, deldeb
+    #print ('B', nsh, age, deldeb)
     
     
     stressW = ls_ftswStress['WaterTreshDevI'][nump]
@@ -1044,13 +1064,21 @@ B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
             
             #print('B',nsh, newpar/meteo_j['I0'])
             
+            #debug
+            #print(f"produce T with B !! | nump: {nump} | nsh: {nsh} | total sh: {invar['countSh'][nump]} | newpar: {newpar} | I0: {meteo_j['I0']} | seuil: {seuil} | age: {age} | r_deldeb: {deldeb/(0.00001+stressW*stressN)}")
+
+            
             rgeq = invar['rgeq'][nump]#0
             #print nsh, 'rgeq', rgeq, invar['rgeq'][nump]
+            #B produit une nouvelle tige pouvant taller (une tige + un B)
             produce [@M(posi1,posi2,posi3)SetHead()/(azi)&(90)B(nump,newnsh,newageB,posini[0],posini[1],posini[2],new_nrhiz,newazi,0,1)][D(nump,newnsh2,0,newageB,posini[0],posini[1],posini[2],nsh)]SHP(nump,nsh, azi,elv0,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,0,rgeq,azi)
         
         elif statut==1 and invar['countShExp'][nump]< ParamP[nump]['nshoots']-1 and (stressW < limStressTalW or stressN < limStressTalN): #'exp'
             # nouvelle tige qui demarre pas a cause de stress -> mort bourgeon
             #print('limstressTal', nump, nsh, stressW, stressN)
+
+            #print('mort B ','limstressTal', nump, nsh, stressW, stressN)
+
             produce *
             
         else: #tige en place qui repart
@@ -1062,14 +1090,22 @@ B(nump, nsh, age, posi1,, posi2, posi3, nrhiz, azi, par, statut):
                 sh.germinate(invar, ParamP[nump], nump)
             
             #print('B',nsh, newpar/meteo_j['I0'])
+            #debug
+            #print('produce T sans B','nsh :',nsh,'newpar :',newpar, 'I0 :',meteo_j['I0'], 'par_tresh_til :', ParamP[nump]['par_tresh_til'], 'age :', age,'r_deldeb :', deldeb/(0.00001+stressW*stressN))
             
             rgeq = invar['rgeq'][nump]#0
+            #B produit une tige qui ne talle pas (tige sans bourgeon)
             produce [D(nump,newnsh,0,newageB,posini[0],posini[1],posini[2],nsh)]SHP(nump,nsh, azi,elv0,0,newpar)GetPos(0,0,0,nump)A(nump,nsh,1,newageA,0,deltaBud, rgeq,azi)
     elif age >= phylloPot/(0.00001+ls_ftswStress['WaterTreshDevI'][nump]*ls_NNIStress['NTreshDevII'][nump]) and nrhiz>=1:
         newageB = age%phylloPot
+        #pour les rhizome, phytomères souterrains
         produce F(ParamP[nump]['LenRhiz'])B(nump,nsh,newageB, posi1, posi2, posi3,  nrhiz-1, azi, newpar, statut)
     else:
         newageB = age+STEPS
+        #attente du step suivant 
+        #debug
+        #print(f"attente B... | nump: {nump} | nsh: {nsh} | total sh: {invar['countSh'][nump]} | newpar: {newpar} | I0: {meteo_j['I0']} | seuil: {seuil} | age: {age} | r_deldeb: {deldeb/(0.00001+stressW*stressN)}")
+
         produce B(nump,nsh,newageB, posi1, posi2, posi3, nrhiz, azi, newpar, statut)
 
 
@@ -1315,6 +1351,8 @@ SHP(nump,nsh, azi,elv0,nbp,par):
      else:
         vox = riri.WhichVoxel(carto[nump], origin_grid, na, dxyz)
         newpar = res_trans[-1][vox[1]][vox[0]]/surf_refVOX
+        #methode debug gaetan
+        #newpar = (1 - sum(outvar['epsi'][-1][2:])) * meteo_j['I0']
         produce SHP(nump,nsh, azi,elv0, nbp+1, newpar)
 #??erreur nbp (nb phytomere devrait dependre meme regle que phyllochrone! (bon seulement pour cet exemple)
 
@@ -1439,6 +1477,9 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
     
     #sen participe a surface et LAI (interception) mais pas au PARa (absorption)
     if age> ParamP[nump]['spanMrt'] or tt_omb> ParamP[nump]['ombF_Ttresh']+ParamP[nump]['spanMrt']-ParamP[nump]['spanSen'] :
+        #debug
+        #print('plante : ', nump, ' | tige :',nsh, ' | feuille :',rank,' => mort !')    
+
         mfeuilmorte = surF*10000/ParamP[nump]['SLAmin'] #g
         invar['dMSenFeuil'][nump] += mfeuilmorte
         
@@ -1503,7 +1544,9 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
             SurfprofilPlant[nump][strate] += surF
         
         
-        if age> ParamP[nump]['spanSen'] : 
+        if age> ParamP[nump]['spanSen'] :
+            #debug 
+            #print('plante : ', nump, ' | tige :',nsh, ' | feuille :',rank,' => sen !')    
             if nf > 3 or surF >= tresh_LA:#15cm2#  #feuilles multifoliee 
                 surf_elementaire = surF / float(len(ls_pts[0]))
                 for i in range(len(ls_pts[0])):
@@ -1518,7 +1561,8 @@ GetPos(X0,Y0,Z0,nump2)GetUp(V1,V2,V3)Lf(nump,nsh,age,azi,rank,rankp,l,tt_omb,Lcu
             
             produce GetPos(X0,Y0,Z0,nump)GetUp(V1,V2,V3)Lf(nump,nsh,newage,azi,rank,rankp,l,tt_omb,Lcutnew,-1,ordre,noise1, noise2) #sen
         elif tt_omb> ParamP[nump]['ombF_Ttresh']:
-            #print "ombre!"
+            #debug
+            print ('plante : ', nump, ' | tige :',nsh, ' | feuille :',rank,' => ombre !')
             if nf > 3 or surF >= tresh_LA:#15cm2#  #feuilles multifoliee 
                 surf_elementaire = surF / float(len(ls_pts[0]))
                 for i in range(len(ls_pts[0])):
